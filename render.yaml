@@ -10,8 +10,8 @@ services:
     region: oregon
     plan: free
     branch: main
-    buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT
+    buildCommand: cd ashergo/backend && pip install -r requirements.txt
+    startCommand: cd ashergo/backend && uvicorn server:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:

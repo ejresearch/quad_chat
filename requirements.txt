@@ -1,0 +1,5 @@
+# ASHER Project Requirements
+# Main dependencies are in ashergo/backend/requirements.txt
+# This file is for convenience when running from root
+
+-r ashergo/backend/requirements.txt

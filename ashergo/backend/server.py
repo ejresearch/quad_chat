@@ -1,6 +1,6 @@
 """
-ASHER Standalone Backend
-AI Provider A/B/C/D Testing Server
+AsherGO Backend Server
+AI Provider Testing with Authentication & Saved Conversations
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
@@ -32,9 +32,9 @@ document_storage = DocumentStorage(storage_path="data/documents.json")
 
 # Create FastAPI app
 app = FastAPI(
-    title="ASHER - AI Testing Lab",
-    description="Standalone A/B/C/D Testing for Multiple AI Providers",
-    version="1.2.0"
+    title="AsherGO - AI Testing Lab",
+    description="AI Provider Testing with Authentication & Saved Conversations",
+    version="2.0.0"
 )
 
 # CORS Configuration - Allow all origins for standalone tool
@@ -57,66 +57,66 @@ app.include_router(conversations_router)
 app.include_router(messages_router)
 
 # Mount static files (frontend)
-# Get the parent directory (ASHER root)
+# Get the frontend directory (sibling to backend)
 import pathlib
-parent_dir = pathlib.Path(__file__).parent.parent
-app.mount("/static", StaticFiles(directory=str(parent_dir)), name="static")
+frontend_dir = pathlib.Path(__file__).parent.parent / "frontend"
+app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
 
 # Serve index.html at root and other routes
 from fastapi.responses import FileResponse
 
 @app.get("/index.html")
 async def serve_index():
-    return FileResponse(str(parent_dir / "index.html"))
+    return FileResponse(str(frontend_dir / "index.html"))
 
 @app.get("/go")
 async def serve_ashergo():
-    return FileResponse(str(parent_dir / "ashergo.html"))
+    return FileResponse(str(frontend_dir / "ashergo.html"))
 
 @app.get("/ashergo.html")
 async def serve_ashergo_html():
-    return FileResponse(str(parent_dir / "ashergo.html"))
+    return FileResponse(str(frontend_dir / "ashergo.html"))
 
 @app.get("/landing.html")
 async def serve_landing_html():
-    return FileResponse(str(parent_dir / "landing.html"))
+    return FileResponse(str(frontend_dir / "landing.html"))
 
 @app.get("/auth.html")
 async def serve_auth_html():
-    return FileResponse(str(parent_dir / "auth.html"))
+    return FileResponse(str(frontend_dir / "auth.html"))
 
 @app.get("/manifest.json")
 async def serve_manifest():
-    return FileResponse(str(parent_dir / "manifest.json"))
+    return FileResponse(str(frontend_dir / "manifest.json"))
 
 @app.get("/service-worker.js")
 async def serve_sw():
-    return FileResponse(str(parent_dir / "service-worker.js"))
+    return FileResponse(str(frontend_dir / "service-worker.js"))
 
 # Serve CSS files
 @app.get("/css/{file_name}")
 async def serve_css(file_name: str):
-    return FileResponse(str(parent_dir / "css" / file_name))
+    return FileResponse(str(frontend_dir / "css" / file_name))
 
 # Serve JS files
 @app.get("/js/{file_name}")
 async def serve_js(file_name: str):
-    return FileResponse(str(parent_dir / "js" / file_name))
+    return FileResponse(str(frontend_dir / "js" / file_name))
 
 # Serve icons
 @app.get("/icons/{file_name}")
 async def serve_icons(file_name: str):
-    return FileResponse(str(parent_dir / "icons" / file_name))
+    return FileResponse(str(frontend_dir / "icons" / file_name))
 
 # Serve images
 @app.get("/images/{file_name}")
 async def serve_images(file_name: str):
-    return FileResponse(str(parent_dir / "images" / file_name))
+    return FileResponse(str(frontend_dir / "images" / file_name))
 
 # Serve images from logos subfolder
 @app.get("/images/logos/{file_name}")
 async def serve_logo_images(file_name: str):
-    return FileResponse(str(parent_dir / "images" / "logos" / file_name))
+    return FileResponse(str(frontend_dir / "images" / "logos" / file_name))
 
 # Request/Response Models
 class AsherTestRequest(BaseModel):
@@ -139,7 +139,7 @@ class AsherTestResponse(BaseModel):
 # Root endpoint - serve the landing page
 @app.get("/")
 async def root():
-    return FileResponse(str(parent_dir / "landing.html"))
+    return FileResponse(str(frontend_dir / "landing.html"))
 
 # API info endpoint
 @app.get("/api")
@@ -166,8 +166,8 @@ def api_info():
 def health_check():
     return {
         "status": "healthy",
-        "service": "ASHER Testing Lab",
-        "version": "1.2.0"
+        "service": "AsherGO",
+        "version": "2.0.0"
     }
 
 
@@ -416,6 +416,6 @@ if __name__ == "__main__":
     # Use PORT from environment (for Render/production) or default to 8001
     port = int(os.getenv("PORT", "8001"))
 
-    print("🧪 Starting ASHER Testing Lab...")
-    print(f"📡 Server will run at: http://localhost:{port}")
+    print("🚀 Starting AsherGO...")
+    print(f"📡 Server: http://localhost:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)
