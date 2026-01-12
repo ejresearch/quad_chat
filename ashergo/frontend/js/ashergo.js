@@ -500,14 +500,29 @@ function buildContext() {
 
 // Send Message
 async function sendMessage() {
-    if (!currentConversation) {
-        alert('Please select or create a conversation first');
-        return;
-    }
-
     const input = document.getElementById('message-input');
     const message = input.value.trim();
     if (!message) return;
+
+    // Auto-create conversation if none selected (like ChatGPT)
+    if (!currentConversation) {
+        try {
+            const title = message.substring(0, 50) + (message.length > 50 ? '...' : '');
+            const response = await fetch(`${API_BASE}/api/conversations`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title })
+            });
+            if (!response.ok) throw new Error('Failed to create conversation');
+            const newConvo = await response.json();
+            await loadConversations();
+            await selectConversation(newConvo.id);
+        } catch (error) {
+            console.error('Error auto-creating conversation:', error);
+            alert('Failed to create conversation');
+            return;
+        }
+    }
 
     const sendBtn = document.getElementById('send-btn');
     sendBtn.disabled = true;
@@ -552,6 +567,18 @@ async function sendMessage() {
 
     sendBtn.disabled = false;
     await selectConversation(currentConversation.id, true);
+}
+
+// Send from welcome screen centered input
+async function sendFromWelcome() {
+    const welcomeInput = document.getElementById('welcome-input');
+    const message = welcomeInput.value.trim();
+    if (!message) return;
+
+    // Copy message to main input and send
+    document.getElementById('message-input').value = message;
+    welcomeInput.value = '';
+    await sendMessage();
 }
 
 async function sendToProvider(providerId, message, systemPrompt, panelNum, skipUserMessage = false, model = null) {
