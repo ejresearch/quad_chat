@@ -514,6 +514,163 @@ async def get_api_keys_status():
     }
 
 
+@app.post("/api/install-desktop-app")
+async def install_desktop_app():
+    """Create a macOS desktop app and place it on the Desktop"""
+    import subprocess
+    import shutil
+
+    try:
+        # Get paths
+        home = os.path.expanduser("~")
+        desktop = os.path.join(home, "Desktop")
+        quadchat_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        app_path = os.path.join(desktop, "QuadChat.app")
+
+        # Remove existing app if present
+        if os.path.exists(app_path):
+            shutil.rmtree(app_path)
+
+        # Create .app bundle structure
+        contents = os.path.join(app_path, "Contents")
+        macos = os.path.join(contents, "MacOS")
+        resources = os.path.join(contents, "Resources")
+
+        os.makedirs(macos)
+        os.makedirs(resources)
+
+        # Create Info.plist
+        info_plist = f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>QuadChat</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.quadchat.app</string>
+    <key>CFBundleName</key>
+    <string>QuadChat</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.13</string>
+</dict>
+</plist>"""
+
+        with open(os.path.join(contents, "Info.plist"), "w") as f:
+            f.write(info_plist)
+
+        # Create launcher script - starts server and opens as standalone app
+        launcher = f"""#!/bin/bash
+
+# QuadChat Desktop App Launcher
+QUADCHAT_ROOT="{quadchat_root}"
+PORT=8001
+
+# Check if server is already running
+if ! curl -s http://localhost:$PORT/health > /dev/null 2>&1; then
+    # Start server in background
+    cd "$QUADCHAT_ROOT"
+    ./quadchat > /dev/null 2>&1 &
+    # Wait for server to be ready
+    for i in {{1..30}}; do
+        if curl -s http://localhost:$PORT/health > /dev/null 2>&1; then
+            break
+        fi
+        sleep 0.5
+    done
+fi
+
+# Open as standalone app window (Chrome app mode or Safari)
+if [ -d "/Applications/Google Chrome.app" ]; then
+    open -na "Google Chrome" --args --app="http://localhost:$PORT" --new-window
+elif [ -d "/Applications/Chromium.app" ]; then
+    open -na "Chromium" --args --app="http://localhost:$PORT" --new-window
+elif [ -d "/Applications/Microsoft Edge.app" ]; then
+    open -na "Microsoft Edge" --args --app="http://localhost:$PORT" --new-window
+elif [ -d "/Applications/Brave Browser.app" ]; then
+    open -na "Brave Browser" --args --app="http://localhost:$PORT" --new-window
+else
+    # Fallback to default browser
+    open "http://localhost:$PORT"
+fi
+"""
+
+        launcher_path = os.path.join(macos, "QuadChat")
+        with open(launcher_path, "w") as f:
+            f.write(launcher)
+        os.chmod(launcher_path, 0o755)
+
+        # Copy icon - convert PNG to ICNS (scaled up to fill the icon area)
+        icon_source = os.path.join(quadchat_root, "quadchat_app", "frontend", "icons", "icon-512.png")
+        icon_dest = os.path.join(resources, "AppIcon.icns")
+
+        if os.path.exists(icon_source):
+            # Create iconset and convert to icns
+            iconset_path = os.path.join(resources, "AppIcon.iconset")
+            os.makedirs(iconset_path)
+
+            # Scale up source significantly to fill the macOS icon area
+            # Your logo has built-in rounded corners, so we need to scale up a lot
+            scale_factor = 1.0  # New logo fills full canvas
+
+            sizes = [16, 32, 128, 256, 512]
+            for size in sizes:
+                # Calculate scaled size (larger than target)
+                scaled_size = int(size * scale_factor)
+
+                # Create oversized version
+                temp_file = os.path.join(iconset_path, f"temp_{size}.png")
+                subprocess.run([
+                    "sips", "-z", str(scaled_size), str(scaled_size),
+                    icon_source, "--out", temp_file
+                ], capture_output=True)
+
+                # Crop to center to get exact size
+                output_file = os.path.join(iconset_path, f"icon_{size}x{size}.png")
+                crop_offset = (scaled_size - size) // 2
+                subprocess.run([
+                    "sips", "-c", str(size), str(size),
+                    temp_file, "--out", output_file
+                ], capture_output=True)
+                os.remove(temp_file)
+
+                # Create @2x versions
+                if size <= 256:
+                    size_2x = size * 2
+                    scaled_size_2x = int(size_2x * scale_factor)
+
+                    temp_file_2x = os.path.join(iconset_path, f"temp_{size}_2x.png")
+                    subprocess.run([
+                        "sips", "-z", str(scaled_size_2x), str(scaled_size_2x),
+                        icon_source, "--out", temp_file_2x
+                    ], capture_output=True)
+
+                    output_file_2x = os.path.join(iconset_path, f"icon_{size}x{size}@2x.png")
+                    subprocess.run([
+                        "sips", "-c", str(size_2x), str(size_2x),
+                        temp_file_2x, "--out", output_file_2x
+                    ], capture_output=True)
+                    os.remove(temp_file_2x)
+
+            # Convert iconset to icns
+            subprocess.run([
+                "iconutil", "-c", "icns", iconset_path, "-o", icon_dest
+            ], capture_output=True)
+
+            # Clean up iconset
+            shutil.rmtree(iconset_path)
+
+        return {"success": True, "message": "QuadChat.app installed to Desktop", "path": app_path}
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
 if __name__ == "__main__":
     import uvicorn
 

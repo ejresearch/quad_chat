@@ -382,7 +382,7 @@
         /* Floating sidebar toggle when collapsed */
         .sidebar-toggle-float {
             position: fixed;
-            top: 0.75rem;
+            bottom: 0.75rem;
             left: 0.75rem;
             width: 40px;
             height: 40px;
@@ -696,7 +696,7 @@
         }
 
         .modal-btn.primary {
-            background: linear-gradient(135deg, var(--openai) 0%, var(--claude) 50%, var(--grok) 100%);
+            background: #3f3f3f;
             color: white;
         }
 
@@ -744,8 +744,8 @@
         }
 
         .upload-zone:hover {
-            border-color: var(--accent);
-            background: rgba(79, 103, 177, 0.03);
+            border-color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .upload-zone svg {
@@ -836,7 +836,7 @@
         }
 
         .theme-switch input:checked + .theme-slider {
-            background: linear-gradient(135deg, var(--openai) 0%, var(--claude) 50%, var(--grok) 100%);
+            background: #4f4f4f;
         }
 
         .theme-switch input:checked + .theme-slider:before {
@@ -968,7 +968,7 @@
         }
 
         .provider-toggle input:checked + .provider-toggle-slider {
-            background: linear-gradient(135deg, var(--openai) 0%, var(--claude) 50%, var(--grok) 100%);
+            background: #4f4f4f;
         }
 
         .provider-toggle input:checked + .provider-toggle-slider:before {
@@ -1464,6 +1464,18 @@
                             <button class="api-key-btn" onclick="saveAndTestKey('xai')">Save</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Install App -->
+                <div class="settings-section">
+                    <h4>Install App</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
+                        Add QuadChat to your Desktop as a native app.
+                    </p>
+                    <button id="install-desktop-btn" class="api-key-btn" onclick="installDesktopApp()" style="width: 100%;">
+                        Install to Desktop
+                    </button>
+                    <p id="install-status" style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.75rem; display: none;"></p>
                 </div>
 
             </div>

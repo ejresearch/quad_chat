@@ -1,102 +1,135 @@
-# ASHER Project
+# QuadChat
 
-AI Provider Testing & Comparison Tools
+QuadChat is a lightweight, local-first framework for querying four large language models in parallel to compare outputs side by side.
 
-## Overview
+---
 
-This repository contains two related tools for testing and comparing AI providers:
+## Why QuadChat Exists
 
-| Tool | Description | Status |
-|------|-------------|--------|
-| **AsherGO** | Production app with authentication, saved conversations, and multi-provider testing | Active (Render) |
-| **ASHER** | Original standalone A/B/C/D testing tool (no auth required) | Legacy |
+Many platforms allow users to query multiple LLMs simultaneously, but most are hosted services with limited transparency, constrained customization, or locked-in pricing models.
 
-## Structure
+QuadChat is designed as an open-source, local framework that gives users full control over:
 
-```
-ASHER/
-├── ashergo/                 # Production tool (Render-facing)
-│   ├── backend/             # FastAPI server
-│   │   ├── server.py        # Main server
-│   │   ├── ai_providers.py  # AI integrations
-│   │   ├── database.py      # PostgreSQL
-│   │   ├── routes_*.py      # API routes
-│   │   └── requirements.txt
-│   └── frontend/            # Web UI
-│       ├── index.html       # Main app (AsherGO)
-│       ├── landing.html     # Landing page
-│       ├── auth.html        # Authentication
-│       ├── js/ashergo.js    # Frontend logic
-│       ├── css/
-│       └── images/
-│
-├── legacy/                  # Original ASHER (standalone)
-│   ├── index.html           # Original testing UI
-│   ├── js/app_new.js        # Frontend logic
-│   ├── css/
-│   ├── images/
-│   ├── docs/                # Documentation
-│   └── start.sh             # Local startup script
-│
-├── render.yaml              # Render deployment config
-└── README.md                # This file
-```
+- API keys
+- Rate limits
+- Prompt structure
+- Model comparison workflows
 
-## AsherGO (Production)
+The goal is not abstraction, but clarity—making it easy to see how different models respond to the same prompt under the same conditions.
 
-Full-featured AI testing platform with:
-- User authentication (signup/login)
-- Persistent conversation history
-- Multi-provider comparison (OpenAI, Anthropic, Google, xAI)
-- Document upload & reference
-- PostgreSQL database
+---
 
-### Deploy to Render
+## Features
 
-1. Push to GitHub
-2. Connect repo to Render
-3. Render auto-detects `render.yaml`
-4. Add API keys in Render dashboard
+- Parallel querying of four LLMs for direct output comparison
+- Support for the latest released APIs from major model providers
+- System prompt configuration for consistent prompt engineering
+- Optional document upload to provide shared context
+- Familiar chat-style interface inspired by common LLM platforms
+- Bring-your-own API keys with full local control
 
-### Run Locally
+---
+
+## Tech Stack
+
+- **Backend:** Python 3.11+ / FastAPI / Uvicorn
+- **Frontend:** Vanilla JavaScript (no frameworks)
+- **Database:** SQLite (zero-config local storage)
+- **Provider SDKs:** OpenAI, Anthropic, Google Generative AI, xAI
+
+---
+
+## Quick Start
 
 ```bash
-cd ashergo/backend
-pip install -r requirements.txt
-python server.py
+git clone https://github.com/yourusername/quadchat.git
+cd quadchat
+./install.sh
 ```
 
-Open: http://localhost:8001
+This installs the `quadchat` command globally. First run will set up the Python environment automatically.
 
-## ASHER Legacy (Standalone)
+---
 
-Original tool for quick A/B/C/D testing without authentication.
+## API Keys
 
-### Run Locally
+QuadChat requires an API key for each provider you want to query. Create accounts and generate keys directly from each provider:
+
+| Provider | Get API Key |
+|----------|-------------|
+| OpenAI | https://platform.openai.com/api-keys |
+| Anthropic (Claude) | https://console.anthropic.com/settings/keys |
+| Google (Gemini) | https://ai.google.dev/gemini-api/docs/api-key |
+| xAI (Grok) | https://console.x.ai/ |
+
+Add your keys to `quadchat_app/backend/.env`:
+
+```
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=AIza...
+XAI_API_KEY=xai-...
+```
+
+Keys are stored locally and never shared.
+
+---
+
+## Running QuadChat
+
+**From terminal:**
 
 ```bash
-cd legacy
-./start.sh
+quadchat
 ```
 
-## Environment Variables
+**From Desktop app:**
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Yes (AsherGO) | PostgreSQL connection string |
-| `JWT_SECRET` | Yes (AsherGO) | Secret for JWT tokens |
-| `OPENAI_API_KEY` | Optional | OpenAI API key |
-| `ANTHROPIC_API_KEY` | Optional | Anthropic API key |
-| `GOOGLE_API_KEY` | Optional | Google Gemini API key |
-| `XAI_API_KEY` | Optional | xAI Grok API key |
+Double-click `QuadChat.app` on your Desktop.
 
-## Supported AI Providers
+QuadChat runs locally at `http://localhost:8001`.
 
-- OpenAI (GPT-4, GPT-5, o3)
-- Anthropic (Claude Sonnet, Claude Opus)
-- Google (Gemini Pro, Gemini Flash)
-- xAI (Grok)
+---
+
+## Usage
+
+1. Enter a system prompt (optional)
+2. Upload reference documents (optional)
+3. Submit a user prompt
+4. Review model outputs side by side
+
+**Use cases:**
+
+- Prompt engineering
+- Model evaluation
+- Qualitative comparison
+- Learning and experimentation
+
+---
+
+## Desktop App
+
+To install QuadChat as a desktop application:
+
+1. Run `quadchat` to start the server
+2. Open Settings (gear icon in sidebar)
+3. Click **Install to Desktop**
+
+This creates `QuadChat.app` on your Desktop. Double-click to launch QuadChat as a standalone app window.
+
+---
 
 ## License
 
 MIT
+
+---
+
+## Acknowledgements
+
+This project uses APIs provided by:
+
+- OpenAI
+- Anthropic
+- Google DeepMind
+- xAI

@@ -1015,3 +1015,114 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// PWA Install functionality
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    updateInstallButton();
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    updateInstallButton();
+});
+
+function updateInstallButton() {
+    const btn = document.getElementById('install-app-btn');
+    const instructions = document.getElementById('install-instructions');
+    if (!btn) return;
+
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        btn.textContent = 'Already Installed';
+        btn.disabled = true;
+        instructions.style.display = 'none';
+    } else if (deferredPrompt) {
+        btn.textContent = 'Install QuadChat';
+        btn.disabled = false;
+        instructions.style.display = 'none';
+    } else {
+        // Show manual instructions for Safari/iOS
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+        if (isIOS || (isSafari && isMac)) {
+            btn.textContent = 'How to Install';
+            btn.disabled = false;
+            instructions.innerHTML = '';
+        } else {
+            btn.textContent = 'Install QuadChat';
+            btn.disabled = false;
+        }
+    }
+}
+
+function installApp() {
+    const instructions = document.getElementById('install-instructions');
+
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            deferredPrompt = null;
+            updateInstallButton();
+        });
+    } else {
+        // Show manual instructions
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+        if (isIOS) {
+            instructions.innerHTML = 'Tap the <strong>Share</strong> button, then <strong>"Add to Home Screen"</strong>';
+        } else if (isSafari && isMac) {
+            instructions.innerHTML = 'In Safari menu: <strong>File → Add to Dock</strong>';
+        } else {
+            instructions.innerHTML = 'Click the install icon in your browser\'s address bar, or use <strong>Menu → Install QuadChat</strong>';
+        }
+        instructions.style.display = 'block';
+    }
+}
+
+// Install desktop app
+async function installDesktopApp() {
+    const btn = document.getElementById('install-desktop-btn');
+    const status = document.getElementById('install-status');
+
+    btn.disabled = true;
+    btn.textContent = 'Installing...';
+    status.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/install-desktop-app', {
+            method: 'POST'
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            btn.textContent = 'Installed!';
+            status.innerHTML = 'QuadChat.app added to your Desktop. Double-click to launch.';
+            status.style.color = '#ffffff';
+            status.style.display = 'block';
+
+            setTimeout(() => {
+                btn.textContent = 'Install to Desktop';
+                btn.disabled = false;
+            }, 3000);
+        } else {
+            btn.textContent = 'Install Failed';
+            status.innerHTML = result.error || 'Unknown error';
+            status.style.color = '#ef4444';
+            status.style.display = 'block';
+            btn.disabled = false;
+        }
+    } catch (error) {
+        btn.textContent = 'Install Failed';
+        status.innerHTML = error.message;
+        status.style.color = '#ef4444';
+        status.style.display = 'block';
+        btn.disabled = false;
+    }
+}
