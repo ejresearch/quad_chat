@@ -1,24 +1,15 @@
-databases:
-  - name: ashergo-db
-    plan: free
-    region: oregon
+# QuadChat v2.0.0 - Render Deployment Configuration
 
 services:
   - type: web
-    name: ashergo-beta
+    name: quadchat
     env: python
     region: oregon
     plan: free
     branch: main
-    buildCommand: cd ashergo/backend && pip install -r requirements.txt
-    startCommand: cd ashergo/backend && uvicorn server:app --host 0.0.0.0 --port $PORT
+    buildCommand: cd quadchat_app/backend && pip install -r requirements.txt
+    startCommand: cd quadchat_app/backend && uvicorn server:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: ashergo-db
-          property: connectionString
-      - key: JWT_SECRET
-        generateValue: true
       - key: OPENAI_API_KEY
         sync: false
       - key: ANTHROPIC_API_KEY
