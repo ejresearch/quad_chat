@@ -1,4 +1,4 @@
-// ASHER PWA Service Worker
+// QuadChat PWA Service Worker
 const CACHE_NAME = 'asher-v1';
 const urlsToCache = [
   '/index.html',
@@ -12,11 +12,11 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('ASHER: Cache opened');
+        console.log('QuadChat: Cache opened');
         return cache.addAll(urlsToCache);
       })
       .catch((err) => {
-        console.log('ASHER: Cache installation failed', err);
+        console.log('QuadChat: Cache installation failed', err);
       })
   );
 });
@@ -50,7 +50,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('ASHER: Deleting old cache', cacheName);
+            console.log('QuadChat: Deleting old cache', cacheName);
             return caches.delete(cacheName);
           }
         })

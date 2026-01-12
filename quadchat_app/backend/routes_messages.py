@@ -1,5 +1,5 @@
 """
-Message API routes for ASHER (no auth - local use)
+Message API routes for QuadChat (no auth - local use)
 Uses API keys from .env file
 """
 

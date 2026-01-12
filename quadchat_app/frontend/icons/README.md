@@ -1,4 +1,4 @@
-# ASHER App Icons
+# QuadChat App Icons
 
 To complete the PWA setup, you need to create two app icons:
 
@@ -10,14 +10,14 @@ To complete the PWA setup, you need to create two app icons:
 
 ### Option 1: Use an Icon Generator (Easiest)
 1. Go to https://www.pwabuilder.com/imageGenerator
-2. Upload any square logo or design for ASHER
+2. Upload any square logo or design for QuadChat
 3. Download the generated icons
 4. Place `icon-192.png` and `icon-512.png` in this folder
 
 ### Option 2: Create Manually
 1. Design a square icon (512x512 recommended)
 2. Suggested design:
-   - Text "ASHER" in bold font
+   - Text "QuadChat" in bold font
    - Background: Dark (#1a1a1a) or Blue (#007aff)
    - Simple, recognizable design
 3. Export as PNG:
@@ -36,4 +36,4 @@ For testing, you can use simple colored squares:
 - Avoid fine details (looks small on phone)
 - Test how it looks on both light and dark backgrounds
 
-Once you add these icons, ASHER will display properly when installed on iPhone/iPad home screens.
+Once you add these icons, QuadChat will display properly when installed on iPhone/iPad home screens.

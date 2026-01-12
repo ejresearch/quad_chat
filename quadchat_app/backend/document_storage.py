@@ -1,5 +1,5 @@
 """
-Document Storage System for ASHER
+Document Storage System for QuadChat
 Provides persistent storage for uploaded reference documents
 """
 

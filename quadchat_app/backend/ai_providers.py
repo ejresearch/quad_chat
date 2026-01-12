@@ -1,5 +1,5 @@
 """
-Multi-Provider AI Service for ASHER
+Multi-Provider AI Service for QuadChat
 Supports: OpenAI, Anthropic Claude, Google Gemini, xAI Grok
 """
 

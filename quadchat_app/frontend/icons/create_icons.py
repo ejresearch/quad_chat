@@ -7,7 +7,7 @@ try:
     font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 60)
 except:
     font = ImageFont.load_default()
-draw.text((96, 96), "ASHER", fill='white', anchor='mm', font=font)
+draw.text((96, 96), "QuadChat", fill='white', anchor='mm', font=font)
 img192.save('icon-192.png')
 
 # Create 512x512 icon
@@ -17,7 +17,7 @@ try:
     font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 160)
 except:
     font = ImageFont.load_default()
-draw.text((256, 256), "ASHER", fill='white', anchor='mm', font=font)
+draw.text((256, 256), "QuadChat", fill='white', anchor='mm', font=font)
 img512.save('icon-512.png')
 
 print("Icons created successfully!")

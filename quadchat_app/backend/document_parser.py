@@ -1,5 +1,5 @@
 """
-Document Parser for ASHER
+Document Parser for QuadChat
 Supports: TXT, DOCX, MD, PDF, CSV, HTML, JSON
 """
 

@@ -1,5 +1,5 @@
 """
-Database connection and helper functions for ASHER (local use)
+Database connection and helper functions for QuadChat (local use)
 Uses SQLite for zero-configuration local storage
 """
 

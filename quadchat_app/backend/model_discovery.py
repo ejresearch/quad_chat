@@ -1,5 +1,5 @@
 """
-Model Discovery Service for ASHER
+Model Discovery Service for QuadChat
 Automatically discovers new models from each AI provider API and tests them.
 Designed to run weekly via cron or scheduler.
 
@@ -325,7 +325,7 @@ class ModelDiscovery:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="ASHER Model Discovery Service")
+    parser = argparse.ArgumentParser(description="QuadChat Model Discovery Service")
     parser.add_argument("--update", action="store_true",
                        help="Discover, test, and update ai_providers.py")
     parser.add_argument("--test", action="store_true",

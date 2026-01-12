@@ -1,5 +1,5 @@
 """
-Conversation API routes for ASHER (no auth - local use)
+Conversation API routes for QuadChat (no auth - local use)
 """
 
 from fastapi import APIRouter, HTTPException
