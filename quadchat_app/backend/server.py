@@ -605,7 +605,7 @@ fi
             f.write(launcher)
         os.chmod(launcher_path, 0o755)
 
-        # Copy icon - convert PNG to ICNS (scaled up to fill the icon area)
+        # Copy icon - convert PNG to ICNS
         icon_source = os.path.join(quadchat_root, "quadchat_app", "frontend", "icons", "icon-512.png")
         icon_dest = os.path.join(resources, "AppIcon.icns")
 
@@ -614,48 +614,24 @@ fi
             iconset_path = os.path.join(resources, "AppIcon.iconset")
             os.makedirs(iconset_path)
 
-            # Scale up source significantly to fill the macOS icon area
-            # Your logo has built-in rounded corners, so we need to scale up a lot
-            scale_factor = 1.0  # New logo fills full canvas
-
+            # Generate all required icon sizes
             sizes = [16, 32, 128, 256, 512]
             for size in sizes:
-                # Calculate scaled size (larger than target)
-                scaled_size = int(size * scale_factor)
-
-                # Create oversized version
-                temp_file = os.path.join(iconset_path, f"temp_{size}.png")
-                subprocess.run([
-                    "sips", "-z", str(scaled_size), str(scaled_size),
-                    icon_source, "--out", temp_file
-                ], capture_output=True)
-
-                # Crop to center to get exact size
+                # Standard resolution
                 output_file = os.path.join(iconset_path, f"icon_{size}x{size}.png")
-                crop_offset = (scaled_size - size) // 2
                 subprocess.run([
-                    "sips", "-c", str(size), str(size),
-                    temp_file, "--out", output_file
+                    "sips", "-z", str(size), str(size),
+                    icon_source, "--out", output_file
                 ], capture_output=True)
-                os.remove(temp_file)
 
-                # Create @2x versions
+                # @2x retina versions (except 512 which is already max)
                 if size <= 256:
                     size_2x = size * 2
-                    scaled_size_2x = int(size_2x * scale_factor)
-
-                    temp_file_2x = os.path.join(iconset_path, f"temp_{size}_2x.png")
-                    subprocess.run([
-                        "sips", "-z", str(scaled_size_2x), str(scaled_size_2x),
-                        icon_source, "--out", temp_file_2x
-                    ], capture_output=True)
-
                     output_file_2x = os.path.join(iconset_path, f"icon_{size}x{size}@2x.png")
                     subprocess.run([
-                        "sips", "-c", str(size_2x), str(size_2x),
-                        temp_file_2x, "--out", output_file_2x
+                        "sips", "-z", str(size_2x), str(size_2x),
+                        icon_source, "--out", output_file_2x
                     ], capture_output=True)
-                    os.remove(temp_file_2x)
 
             # Convert iconset to icns
             subprocess.run([

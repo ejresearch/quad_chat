@@ -341,6 +341,11 @@
             color: #fff;
         }
 
+        .settings-btn.help-btn {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
         .sidebar-toggle {
             display: none;
             width: 36px;
@@ -1118,6 +1123,218 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* Onboarding Wizard Styles */
+        .onboarding-modal {
+            max-width: 420px;
+            width: 90%;
+            padding: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+            border: 1px solid #3f3f3f;
+        }
+
+        .onboarding-skip {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .onboarding-skip:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .onboarding-content {
+            padding: 2.5rem 2rem 1.5rem;
+            height: 340px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .onboarding-step {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .onboarding-step.active {
+            display: flex;
+        }
+
+        .onboarding-icon {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .onboarding-icon svg {
+            opacity: 0.9;
+            width: 36px;
+            height: 36px;
+        }
+
+        .onboarding-step h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .onboarding-step p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 0.25rem;
+        }
+
+        .onboarding-subtitle {
+            font-size: 0.8rem !important;
+            color: var(--text-secondary);
+            margin-top: 0.75rem !important;
+        }
+
+        .onboarding-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            max-width: 280px;
+        }
+
+        .onboarding-links a {
+            padding: 0.6rem 0.75rem;
+            background: #2f2f2f;
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .onboarding-links a:hover {
+            background: #3f3f3f;
+        }
+
+        .onboarding-feature {
+            background: #2f2f2f;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            margin: 0.3rem 0;
+            width: 100%;
+            text-align: left;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .onboarding-feature strong {
+            color: var(--text-primary);
+        }
+
+        .onboarding-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 1rem 2rem 1.5rem;
+            border-top: 1px solid #2f2f2f;
+        }
+
+        .onboarding-arrow {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2f2f2f;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .onboarding-arrow:hover:not(:disabled) {
+            background: #3f3f3f;
+        }
+
+        .onboarding-arrow:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .onboarding-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .onboarding-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3f3f3f;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .onboarding-dot.active {
+            background: var(--text-primary);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .onboarding-dot:hover:not(.active) {
+            background: #5f5f5f;
+        }
+
+        .onboarding-done {
+            display: none;
+            width: calc(100% - 4rem);
+            margin: 0 2rem 1.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .onboarding-done:hover {
+            opacity: 0.9;
+        }
+
+        .onboarding-install-btn {
+            padding: 0.75rem 2rem;
+            background: #2f2f2f;
+            color: var(--text-primary);
+            border: 1px solid #4f4f4f;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin: 1rem 0;
+        }
+
+        .onboarding-install-btn:hover {
+            background: #3f3f3f;
+        }
     </style>
 </head>
 <body>
@@ -1170,6 +1387,7 @@
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
                 </button>
+                <button class="settings-btn help-btn" onclick="showOnboarding()" title="Setup Guide">?</button>
             </div>
         </aside>
 
@@ -1509,6 +1727,101 @@
         </div>
     </div>
 
-    <script src="js/quadchat.js?v=11"></script>
+    <!-- Onboarding Wizard Modal -->
+    <div id="onboarding-modal" class="modal-overlay" style="display: none;">
+        <div class="modal onboarding-modal">
+            <button class="onboarding-skip" onclick="closeOnboarding()">Skip</button>
+
+            <div class="onboarding-content">
+                <!-- Step 1: Welcome -->
+                <div class="onboarding-step active" data-step="1">
+                    <h2>Welcome to QuadChat</h2>
+                    <p>Query four AI models in parallel and compare their responses side by side.</p>
+                    <p class="onboarding-subtitle">Let's get you set up in 5 quick steps.</p>
+                </div>
+
+                <!-- Step 2: API Keys -->
+                <div class="onboarding-step" data-step="2">
+                    <h2>Add Your API Keys</h2>
+                    <p>Get keys from each provider:</p>
+                    <div class="onboarding-links">
+                        <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI →</a>
+                        <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic →</a>
+                        <a href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank">Google →</a>
+                        <a href="https://console.x.ai/" target="_blank">xAI →</a>
+                    </div>
+                    <p class="onboarding-subtitle">Enter keys in Settings (gear icon).</p>
+                </div>
+
+                <!-- Step 3: System Prompt & Docs -->
+                <div class="onboarding-step" data-step="3">
+                    <h2>Add Context</h2>
+                    <p>Give all models the same instructions and documents.</p>
+                    <div class="onboarding-feature">
+                        <strong>System Prompt:</strong> Set behavior like "You are a coding assistant"
+                    </div>
+                    <div class="onboarding-feature">
+                        <strong>Documents:</strong> Upload PDFs or text for shared context
+                    </div>
+                    <p class="onboarding-subtitle">Use the sidebar to add these.</p>
+                </div>
+
+                <!-- Step 4: Models & Toggles -->
+                <div class="onboarding-step" data-step="4">
+                    <h2>Choose Your Models</h2>
+                    <p>Click any provider logo in the chat header:</p>
+                    <div class="onboarding-feature">
+                        <strong>Toggle:</strong> Enable or disable providers
+                    </div>
+                    <div class="onboarding-feature">
+                        <strong>Model:</strong> Pick version (GPT-5, Claude Opus, etc.)
+                    </div>
+                    <p class="onboarding-subtitle">Active providers appear in the response grid.</p>
+                </div>
+
+                <!-- Step 5: Desktop App -->
+                <div class="onboarding-step" data-step="5">
+                    <h2>Install Desktop App</h2>
+                    <p>Launch QuadChat from your Desktop.</p>
+                    <button class="onboarding-install-btn" onclick="installDesktopApp()">Install to Desktop</button>
+                    <p class="onboarding-subtitle">Optional - you can always use the browser.</p>
+                </div>
+
+                <!-- Step 6: Done -->
+                <div class="onboarding-step" data-step="6">
+                    <h2>You're Ready!</h2>
+                    <p>Start chatting and compare how different models respond.</p>
+                    <p class="onboarding-subtitle">Reopen this guide anytime with the <strong>?</strong> button.</p>
+                </div>
+            </div>
+
+            <div class="onboarding-nav">
+                <button class="onboarding-arrow onboarding-prev" onclick="prevOnboardingStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+
+                <div class="onboarding-dots">
+                    <span class="onboarding-dot active" data-step="1"></span>
+                    <span class="onboarding-dot" data-step="2"></span>
+                    <span class="onboarding-dot" data-step="3"></span>
+                    <span class="onboarding-dot" data-step="4"></span>
+                    <span class="onboarding-dot" data-step="5"></span>
+                    <span class="onboarding-dot" data-step="6"></span>
+                </div>
+
+                <button class="onboarding-arrow onboarding-next" onclick="nextOnboardingStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <button class="onboarding-done" onclick="closeOnboarding()" style="display: none;">Get Started</button>
+        </div>
+    </div>
+
+    <script src="js/quadchat.js?v=12"></script>
 </body>
 </html>

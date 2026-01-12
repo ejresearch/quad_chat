@@ -107,6 +107,30 @@ QuadChat runs locally at `http://localhost:8001`.
 
 ---
 
+## Model Configuration
+
+Click any provider logo in the chat header to:
+
+- **Toggle On/Off:** Enable or disable individual providers
+- **Select Model:** Choose which model version to use (GPT-5, Claude Opus, Gemini Pro, etc.)
+
+Only enabled providers appear in the response grid.
+
+---
+
+## First-Time Setup
+
+On first launch, an interactive setup guide walks you through:
+
+1. Adding API keys
+2. Configuring system prompts and documents
+3. Selecting models
+4. Installing the desktop app
+
+Reopen the guide anytime by clicking the **?** button in the sidebar.
+
+---
+
 ## Desktop App
 
 To install QuadChat as a desktop application:

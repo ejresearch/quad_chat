@@ -1126,3 +1126,85 @@ async function installDesktopApp() {
         btn.disabled = false;
     }
 }
+
+// Onboarding Wizard
+let currentOnboardingStep = 1;
+const totalOnboardingSteps = 6;
+
+function showOnboarding() {
+    currentOnboardingStep = 1;
+    updateOnboardingStep();
+    document.getElementById('onboarding-modal').style.display = 'flex';
+}
+
+function closeOnboarding() {
+    document.getElementById('onboarding-modal').style.display = 'none';
+    localStorage.setItem('quadchat_onboarding_complete', 'true');
+}
+
+function nextOnboardingStep() {
+    if (currentOnboardingStep < totalOnboardingSteps) {
+        currentOnboardingStep++;
+        updateOnboardingStep();
+    }
+}
+
+function prevOnboardingStep() {
+    if (currentOnboardingStep > 1) {
+        currentOnboardingStep--;
+        updateOnboardingStep();
+    }
+}
+
+function goToOnboardingStep(step) {
+    currentOnboardingStep = step;
+    updateOnboardingStep();
+}
+
+function updateOnboardingStep() {
+    // Update steps visibility
+    document.querySelectorAll('.onboarding-step').forEach(el => {
+        el.classList.remove('active');
+    });
+    const activeStep = document.querySelector(`.onboarding-step[data-step="${currentOnboardingStep}"]`);
+    if (activeStep) activeStep.classList.add('active');
+
+    // Update dots
+    document.querySelectorAll('.onboarding-dot').forEach(el => {
+        el.classList.remove('active');
+    });
+    const activeDot = document.querySelector(`.onboarding-dot[data-step="${currentOnboardingStep}"]`);
+    if (activeDot) activeDot.classList.add('active');
+
+    // Update arrows
+    const prevBtn = document.querySelector('.onboarding-prev');
+    const nextBtn = document.querySelector('.onboarding-next');
+    const doneBtn = document.querySelector('.onboarding-done');
+    const nav = document.querySelector('.onboarding-nav');
+
+    if (prevBtn) prevBtn.disabled = currentOnboardingStep === 1;
+
+    // Show done button on last step
+    if (currentOnboardingStep === totalOnboardingSteps) {
+        if (nextBtn) nextBtn.style.display = 'none';
+        if (doneBtn) doneBtn.style.display = 'block';
+    } else {
+        if (nextBtn) nextBtn.style.display = 'flex';
+        if (doneBtn) doneBtn.style.display = 'none';
+    }
+}
+
+// Add click handlers for dots
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.onboarding-dot').forEach(dot => {
+        dot.addEventListener('click', function() {
+            const step = parseInt(this.dataset.step);
+            if (step) goToOnboardingStep(step);
+        });
+    });
+
+    // Check if first launch
+    if (!localStorage.getItem('quadchat_onboarding_complete')) {
+        setTimeout(showOnboarding, 500);
+    }
+});
