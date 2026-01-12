@@ -1283,21 +1283,16 @@ p {
     margin: 0;
 }
 
-/* Chat Grid - Clean unified layout */
+/* Chat Grid - 4 vertical columns */
 .chat-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 1fr;
     gap: 1px;
     padding: 0;
     background: #3f3f3f;
     overflow: hidden;
-}
-
-.chat-grid.columns-layout {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: 1fr;
 }
 
 /* Chat Panel - Clean flat style */
@@ -1334,9 +1329,9 @@ p {
 
 /* Panel Header - Minimal */
 .panel-header {
-    padding: 0.4rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     background: transparent;
-    border-bottom: none;
+    border-bottom: 1px solid #3f3f3f;
     display: flex;
     justify-content: space-between;
     align-items: center;

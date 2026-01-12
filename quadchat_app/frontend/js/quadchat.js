@@ -1,4 +1,4 @@
-// ASHER - AI Provider Testing Tool (Local Use, No Auth)
+// QuadChat - AI Provider Testing Tool (Local Use, No Auth)
 
 const API_BASE = window.location.origin;
 
@@ -26,6 +26,19 @@ let providerModels = {
     '3': 'gemini-3-pro-preview',
     '4': 'grok-4-0709'
 };
+
+// Logo carousel rotation
+let logoCarouselIndex = 0;
+function startLogoCarousel() {
+    const icons = document.querySelectorAll('.logo-provider-icon');
+    if (icons.length === 0) return;
+
+    setInterval(() => {
+        icons[logoCarouselIndex].classList.remove('active');
+        logoCarouselIndex = (logoCarouselIndex + 1) % icons.length;
+        icons[logoCarouselIndex].classList.add('active');
+    }, 2000);
+}
 
 // Reset providers to defaults
 function resetProvidersToDefault() {
@@ -170,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
     loadConversations();
     setupEventListeners();
+    startLogoCarousel();
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.provider-badge') && !e.target.closest('.provider-popover')) {
@@ -203,7 +217,7 @@ function startLogoCarousel() {
 
 // Theme
 function loadTheme() {
-    const savedTheme = localStorage.getItem('asher-theme') || 'dark';
+    const savedTheme = localStorage.getItem('quadchat-theme') || 'dark';
     if (savedTheme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
     }
@@ -219,10 +233,10 @@ function toggleTheme() {
 
     if (isDark) {
         document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('asher-theme', 'dark');
+        localStorage.setItem('quadchat-theme', 'dark');
     } else {
         document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('asher-theme', 'light');
+        localStorage.setItem('quadchat-theme', 'light');
     }
 }
 
@@ -768,13 +782,13 @@ function switchTab(tab) {
 // Sidebar
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    const toggle = document.getElementById('sidebar-toggle');
+    const floatToggle = document.getElementById('sidebar-toggle-float');
     sidebar.classList.toggle('collapsed');
 
     if (sidebar.classList.contains('collapsed')) {
-        toggle.classList.add('visible');
+        floatToggle.classList.add('visible');
     } else {
-        toggle.classList.remove('visible');
+        floatToggle.classList.remove('visible');
     }
 }
 
@@ -785,6 +799,29 @@ function goHome() {
     document.getElementById('single-view').style.display = 'none';
     document.getElementById('grid-view').style.display = 'none';
     document.getElementById('input-bar').style.display = 'none';
+}
+
+// Expand/collapse panel to full width
+let expandedPanel = null;
+
+function toggleExpandPanel(panelNum) {
+    const gridView = document.getElementById('grid-view');
+    const panel = document.getElementById(`panel-${panelNum}`);
+
+    if (expandedPanel === panelNum) {
+        // Collapse - show all panels
+        gridView.classList.remove('has-expanded');
+        panel.classList.remove('expanded');
+        expandedPanel = null;
+    } else {
+        // Expand this panel
+        // First remove expanded from any other panel
+        document.querySelectorAll('.chat-panel.expanded').forEach(p => p.classList.remove('expanded'));
+
+        gridView.classList.add('has-expanded');
+        panel.classList.add('expanded');
+        expandedPanel = panelNum;
+    }
 }
 
 // Modals
@@ -880,12 +917,96 @@ async function handleDocumentUpload(e) {
 
 function openSettingsModal() {
     document.getElementById('settings-modal').style.display = 'flex';
-    const savedTheme = localStorage.getItem('asher-theme') || 'dark';
+    const savedTheme = localStorage.getItem('quadchat-theme') || 'dark';
     document.getElementById('theme-toggle').checked = savedTheme === 'dark';
+    loadApiKeyStatus();
 }
 
 function closeSettingsModal() {
     document.getElementById('settings-modal').style.display = 'none';
+}
+
+// API Key Management
+async function loadApiKeyStatus() {
+    try {
+        const response = await fetch(`${API_BASE}/api/keys/status`);
+        const status = await response.json();
+
+        ['openai', 'anthropic', 'google', 'xai'].forEach(provider => {
+            const statusEl = document.getElementById(`${provider}-status`);
+            if (statusEl) {
+                if (status[provider]) {
+                    statusEl.textContent = 'Configured';
+                    statusEl.className = 'api-key-status configured';
+                } else {
+                    statusEl.textContent = 'Not set';
+                    statusEl.className = 'api-key-status not-configured';
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading API key status:', error);
+    }
+}
+
+async function saveAndTestKey(provider) {
+    const input = document.getElementById(`${provider}-key`);
+    const statusEl = document.getElementById(`${provider}-status`);
+    const btn = event.target;
+    const apiKey = input.value.trim();
+
+    if (!apiKey) {
+        alert('Please enter an API key');
+        return;
+    }
+
+    // Show testing state
+    statusEl.textContent = 'Testing...';
+    statusEl.className = 'api-key-status testing';
+    btn.disabled = true;
+    btn.textContent = 'Testing...';
+
+    try {
+        // Test the key first
+        const testResponse = await fetch(`${API_BASE}/api/keys/test`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider, api_key: apiKey })
+        });
+        const testResult = await testResponse.json();
+
+        if (testResult.success) {
+            // Key is valid, save it
+            const saveResponse = await fetch(`${API_BASE}/api/keys/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ provider, api_key: apiKey })
+            });
+            const saveResult = await saveResponse.json();
+
+            if (saveResult.success) {
+                statusEl.textContent = 'Configured';
+                statusEl.className = 'api-key-status configured';
+                input.value = '';
+                alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} API key saved!`);
+            } else {
+                statusEl.textContent = 'Save failed';
+                statusEl.className = 'api-key-status not-configured';
+                alert(`Failed to save: ${saveResult.error}`);
+            }
+        } else {
+            statusEl.textContent = 'Invalid key';
+            statusEl.className = 'api-key-status not-configured';
+            alert(`API key test failed: ${testResult.error}`);
+        }
+    } catch (error) {
+        statusEl.textContent = 'Error';
+        statusEl.className = 'api-key-status not-configured';
+        alert(`Error: ${error.message}`);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+    }
 }
 
 // Utilities

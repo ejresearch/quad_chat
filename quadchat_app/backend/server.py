@@ -1,5 +1,5 @@
 """
-AsherGO Backend Server
+QuadChat Backend Server
 AI Provider Testing Tool (Local Use)
 """
 
@@ -31,8 +31,8 @@ document_storage = DocumentStorage(storage_path="data/documents.json")
 
 # Create FastAPI app
 app = FastAPI(
-    title="ASHER - AI Testing Lab",
-    description="AI Provider Testing Tool for Local Use",
+    title="QuadChat - AI Testing Lab",
+    description="Chat with 4 AI providers at the same time",
     version="2.0.0"
 )
 
@@ -118,6 +118,11 @@ class AsherTestResponse(BaseModel):
     error: Optional[str] = None
 
 
+class ApiKeyRequest(BaseModel):
+    provider: str
+    api_key: str
+
+
 # Root endpoint - serve the main app
 @app.get("/")
 async def root():
@@ -127,12 +132,12 @@ async def root():
 @app.get("/api")
 def api_info():
     return {
-        "name": "ASHER - AI Testing Lab",
+        "name": "QuadChat - AI Testing Lab",
         "version": "1.2.0",
         "description": "Standalone A/B/C/D testing for AI providers",
         "providers": ["OpenAI", "Anthropic Claude", "Google Gemini", "xAI Grok"],
         "endpoints": {
-            "/": "ASHER Frontend",
+            "/": "QuadChat Frontend",
             "/api": "This API info page",
             "/health": "Health check",
             "/providers": "List available providers",
@@ -148,7 +153,7 @@ def api_info():
 def health_check():
     return {
         "status": "healthy",
-        "service": "ASHER",
+        "service": "QuadChat",
         "version": "2.0.0"
     }
 
@@ -272,7 +277,7 @@ async def batch_test(
 # Status endpoint
 @app.get("/asher/status")
 async def asher_status():
-    """Get ASHER testing environment status"""
+    """Get QuadChat testing environment status"""
     providers = AIProviderManager.list_providers()
 
     # Filter to main 4 providers
@@ -280,7 +285,7 @@ async def asher_status():
     asher_providers = [p for p in providers if p['id'] in main_providers]
 
     return {
-        "service": "ASHER Testing Lab",
+        "service": "QuadChat Testing Lab",
         "version": "1.2.0",
         "available": True,
         "providers": asher_providers,
@@ -392,12 +397,129 @@ async def clear_all_documents():
     }
 
 
+# API Key Management
+@app.post("/api/keys/test")
+async def test_api_key(request: ApiKeyRequest):
+    """Test an API key by making a simple request"""
+    provider = request.provider.lower()
+    api_key = request.api_key.strip()
+
+    if not api_key:
+        return {"success": False, "error": "API key is empty"}
+
+    try:
+        if provider == "openai":
+            import openai
+            client = openai.OpenAI(api_key=api_key)
+            # Make a minimal request to test the key
+            client.models.list()
+            return {"success": True, "message": "OpenAI API key is valid"}
+
+        elif provider == "anthropic":
+            import anthropic
+            client = anthropic.Anthropic(api_key=api_key)
+            # Make a minimal request
+            client.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=5,
+                messages=[{"role": "user", "content": "Hi"}]
+            )
+            return {"success": True, "message": "Anthropic API key is valid"}
+
+        elif provider == "google":
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            model.generate_content("Hi", generation_config={"max_output_tokens": 5})
+            return {"success": True, "message": "Google API key is valid"}
+
+        elif provider == "xai":
+            import openai
+            client = openai.OpenAI(api_key=api_key, base_url="https://api.x.ai/v1")
+            client.models.list()
+            return {"success": True, "message": "xAI API key is valid"}
+
+        else:
+            return {"success": False, "error": f"Unknown provider: {provider}"}
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@app.post("/api/keys/save")
+async def save_api_key(request: ApiKeyRequest):
+    """Save an API key to the .env file"""
+    provider = request.provider.lower()
+    api_key = request.api_key.strip()
+
+    # Map provider to env variable name
+    env_vars = {
+        "openai": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "google": "GOOGLE_API_KEY",
+        "xai": "XAI_API_KEY"
+    }
+
+    if provider not in env_vars:
+        return {"success": False, "error": f"Unknown provider: {provider}"}
+
+    env_var = env_vars[provider]
+    env_path = pathlib.Path(__file__).parent / ".env"
+
+    try:
+        # Read existing .env content
+        env_content = ""
+        if env_path.exists():
+            with open(env_path, "r") as f:
+                env_content = f.read()
+
+        # Update or add the key
+        lines = env_content.split("\n")
+        found = False
+        new_lines = []
+        for line in lines:
+            if line.startswith(f"{env_var}="):
+                new_lines.append(f"{env_var}={api_key}")
+                found = True
+            else:
+                new_lines.append(line)
+
+        if not found:
+            new_lines.append(f"{env_var}={api_key}")
+
+        # Write back
+        with open(env_path, "w") as f:
+            f.write("\n".join(new_lines))
+
+        # Update environment variable in current process
+        os.environ[env_var] = api_key
+
+        # Reload the provider manager
+        load_dotenv(override=True)
+
+        return {"success": True, "message": f"{provider.title()} API key saved"}
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@app.get("/api/keys/status")
+async def get_api_keys_status():
+    """Check which API keys are configured"""
+    return {
+        "openai": bool(os.getenv("OPENAI_API_KEY")),
+        "anthropic": bool(os.getenv("ANTHROPIC_API_KEY")),
+        "google": bool(os.getenv("GOOGLE_API_KEY")),
+        "xai": bool(os.getenv("XAI_API_KEY"))
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
 
     # Use PORT from environment (for Render/production) or default to 8001
     port = int(os.getenv("PORT", "8001"))
 
-    print("🚀 Starting AsherGO...")
+    print("🚀 Starting QuadChat...")
     print(f"📡 Server: http://localhost:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)

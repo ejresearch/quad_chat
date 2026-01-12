@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ASHER - AI Provider Testing</title>
-    <link rel="stylesheet" href="css/styles.css?v=27">
-    <link rel="stylesheet" href="css/mobile.css?v=27">
+    <title>QuadChat - AI Provider Testing</title>
+    <link rel="stylesheet" href="css/styles.css?v=36">
+    <link rel="stylesheet" href="css/mobile.css?v=31">
     <style>
-        /* ASHER - Clean styles */
+        /* QuadChat - Clean styles */
 
         .form-group {
             margin-bottom: 1rem;
@@ -71,34 +71,30 @@
         }
 
         .home-btn {
-            width: auto;
-            height: 40px;
-            padding: 0 1rem;
-            border-radius: 10px;
-            background: var(--bg-tertiary);
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border-radius: 0;
+            background: none !important;
             color: var(--text-primary);
-            border: 1px solid var(--border-subtle, rgba(63, 63, 63, 0.5));
-            font-size: 0.9rem;
-            font-weight: 500;
+            border: none;
             cursor: pointer;
-            transition: background 0.15s ease;
+            transition: opacity 0.15s ease;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            letter-spacing: 0;
+            justify-content: center;
         }
 
         .home-btn:hover {
-            background: var(--bg-primary);
-            filter: none;
-            transform: none;
+            opacity: 0.7;
+            background: none !important;
         }
 
         /* Rotating provider icon in logo */
         .logo-provider-carousel {
             position: relative;
-            width: 14px;
-            height: 14px;
+            width: 24px;
+            height: 24px;
             flex-shrink: 0;
         }
 
@@ -109,7 +105,7 @@
             width: 100%;
             height: 100%;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.5s ease;
         }
 
         .logo-provider-icon.active {
@@ -126,7 +122,7 @@
         /* Welcome State - ChatGPT Style Centered */
         .empty-state-main {
             position: absolute;
-            top: 50%;
+            top: 42%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
@@ -139,6 +135,12 @@
             font-size: 1.75rem;
             font-weight: 500;
             color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .welcome-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
             margin: 0 0 1.5rem 0;
         }
 
@@ -146,7 +148,7 @@
             display: flex;
             align-items: center;
             gap: 0;
-            background: #404040;
+            background: #2f2f2f;
             border-radius: 26px;
             border: none;
             padding: 0.5rem;
@@ -257,13 +259,6 @@
             color: var(--text-primary);
         }
 
-        .new-convo-btn::before {
-            content: '+';
-            font-size: 1.1rem;
-            font-weight: 300;
-            opacity: 0.7;
-        }
-
         .conversation-item {
             padding: 0.65rem 0.75rem;
             background: transparent;
@@ -314,34 +309,36 @@
         }
 
         .sidebar-footer {
-            padding: 0.75rem;
-            border-top: 1px solid var(--bg-tertiary);
+            padding: 1rem;
+            border-top: none;
+            background: #171717;
             display: flex;
             align-items: center;
+            gap: 1rem;
         }
 
         .settings-btn {
             width: 48px;
             height: 48px;
-            border-radius: var(--radius-sm);
-            background: var(--bg-secondary);
+            border-radius: 12px;
+            background: #2f2f2f;
             border: none;
-            color: var(--text-secondary);
+            color: #b4b4b4;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
 
         .settings-btn svg {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
         }
 
         .settings-btn:hover {
-            background: var(--bg-tertiary);
-            color: var(--accent);
+            background: #3f3f3f;
+            color: #fff;
         }
 
         .sidebar-toggle {
@@ -377,88 +374,37 @@
             background: var(--bg-primary);
         }
 
-        /* Tab Bar - ChatGPT Style */
-        .tab-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border-subtle, rgba(63, 63, 63, 0.3));
+        /* Top Bar - Hidden, toggle floats */
+        .top-bar {
+            display: none;
         }
 
-        .tabs {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .tab {
-            width: 36px;
-            height: 36px;
-            padding: 0;
-            background: transparent;
-            border: none;
+        /* Floating sidebar toggle when collapsed */
+        .sidebar-toggle-float {
+            position: fixed;
+            top: 0.75rem;
+            left: 0.75rem;
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s ease;
-            overflow: hidden;
-        }
-
-        .tab:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .tab.active {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .tab-logo {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            object-fit: contain;
-        }
-
-        .tab.active .tab-logo {
-            filter: none;
-        }
-
-        .tab.disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .tab.disabled .tab-logo {
-            filter: grayscale(1);
-            opacity: 0.5;
-        }
-
-        .docs-btn {
-            width: 36px;
-            height: 36px;
-            padding: 0;
-            background: var(--bg-secondary);
-            border: none;
-            border-radius: var(--radius-sm);
+            background: #2f2f2f;
+            border: 1px solid #3f3f3f;
             color: var(--text-secondary);
             cursor: pointer;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
+            z-index: 100;
             transition: all 0.15s;
         }
 
-        .docs-btn:hover {
-            background: var(--accent);
-            color: white;
+        .sidebar-toggle-float.visible {
+            display: flex;
+        }
+
+        .sidebar-toggle-float:hover {
+            background: #3a3a3a;
+            color: var(--text-primary);
         }
 
         /* Chat Area */
@@ -466,7 +412,7 @@
             flex: 1;
             overflow: hidden;
             position: relative;
-            background: var(--bg-secondary);
+            background: #212121;
         }
 
         .empty-state-main {
@@ -505,11 +451,11 @@
             width: 100%;
         }
 
-        /* Grid View - Clean unified look */
+        /* Grid View - 4 vertical columns */
         .grid-view {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: 1fr;
             gap: 1px;
             padding: 0;
             background: #3f3f3f;
@@ -526,9 +472,40 @@
         }
 
         .grid-view .panel-header {
-            padding: 0.4rem 0.75rem;
-            border-bottom: none;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #3f3f3f;
             background: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .expand-btn {
+            background: transparent;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s ease, background 0.15s ease;
+        }
+
+        .expand-btn:hover {
+            color: #fff;
+            background: #3f3f3f;
+        }
+
+        /* Expanded panel state */
+        .grid-view.has-expanded .chat-panel {
+            display: none;
+        }
+
+        .grid-view.has-expanded .chat-panel.expanded {
+            display: flex;
+            grid-column: 1 / -1;
         }
 
         .grid-view .chat-messages {
@@ -585,7 +562,7 @@
             gap: 0;
             max-width: 800px;
             margin: 0 auto;
-            background: #404040;
+            background: #2f2f2f;
             border-radius: 26px;
             border: none;
             padding: 0.5rem 0.5rem 0.5rem 1rem;
@@ -887,11 +864,6 @@
             background: #3a3a3a;
         }
 
-        [data-theme="dark"] .tab:not(.active) .tab-logo {
-            filter: brightness(0) invert(1);
-            opacity: 0.8;
-        }
-
         /* Provider Popover */
         .provider-badge {
             cursor: pointer;
@@ -901,6 +873,10 @@
 
         .provider-badge:hover {
             transform: scale(1.1);
+        }
+
+        .provider-badge-logo {
+            filter: brightness(0) invert(1);
         }
 
         .provider-badge.disabled > .provider-badge-logo {
@@ -1053,6 +1029,95 @@
             background: var(--bg-secondary);
             border-radius: var(--radius-sm);
         }
+
+        .api-key-row {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #3f3f3f;
+        }
+
+        .api-key-row:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .api-key-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .api-key-logo {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        .api-key-status {
+            font-size: 0.75rem;
+            margin-left: auto;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .api-key-status.configured {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .api-key-status.not-configured {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .api-key-status.testing {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+        }
+
+        .api-key-input-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .api-key-input {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #3f3f3f;
+            border-radius: 8px;
+            background: #2f2f2f;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .api-key-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: #3f3f3f;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .api-key-btn:hover {
+            background: #4f4f4f;
+        }
+
+        .api-key-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -1063,7 +1128,6 @@
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <button class="home-btn" onclick="goHome()" title="Home">
-                    ASHER
                     <div class="logo-provider-carousel">
                         <div class="logo-provider-icon active"><img src="images/logos/openai.webp" alt=""></div>
                         <div class="logo-provider-icon"><img src="images/logos/claude.png" alt=""></div>
@@ -1079,13 +1143,27 @@
             </div>
 
             <div class="sidebar-conversations">
-                <button class="new-convo-btn" onclick="openNewConvoModal()">+ New</button>
+                <button class="new-convo-btn" onclick="openNewConvoModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    New chat
+                </button>
                 <div id="conversation-list" class="conversation-list">
                     <!-- Conversations loaded dynamically -->
                 </div>
             </div>
 
             <div class="sidebar-footer">
+                <button class="settings-btn" onclick="openDocsModal()" title="Prompt & Documents">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                </button>
                 <button class="settings-btn" onclick="openSettingsModal()" title="Settings">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -1095,49 +1173,25 @@
             </div>
         </aside>
 
+        <!-- Floating sidebar toggle (shown when sidebar collapsed) -->
+        <button id="sidebar-toggle-float" class="sidebar-toggle-float" onclick="toggleSidebar()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Tab Bar -->
-            <div class="tab-bar">
-                <button id="sidebar-toggle" class="sidebar-toggle" onclick="toggleSidebar()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
-                <div class="tabs">
-                    <button class="tab active" data-tab="all" onclick="switchTab('all')">All</button>
-                    <button class="tab" data-tab="1" onclick="switchTab('1')">
-                        <img src="images/logos/openai.webp" alt="OpenAI" class="tab-logo">
-                    </button>
-                    <button class="tab" data-tab="2" onclick="switchTab('2')">
-                        <img src="images/logos/claude.png" alt="Claude" class="tab-logo">
-                    </button>
-                    <button class="tab" data-tab="3" onclick="switchTab('3')">
-                        <img src="images/logos/gemini.png" alt="Gemini" class="tab-logo">
-                    </button>
-                    <button class="tab" data-tab="4" onclick="switchTab('4')">
-                        <img src="images/logos/grok.svg" alt="Grok" class="tab-logo">
-                    </button>
-                </div>
-                <button class="docs-btn" onclick="openDocsModal()" title="Prompt & Documents">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
-                </button>
-            </div>
 
             <!-- Chat Area -->
             <div id="chat-area" class="chat-area">
                 <!-- Empty state when no conversation selected -->
                 <div id="empty-state" class="empty-state-main">
-                    <h2 class="welcome-prompt">What's on your mind today?</h2>
+                    <p class="welcome-subtitle">Chat with Claude, Grok, ChatGPT, and Gemini at the same time!</p>
                     <div class="welcome-input-container">
-                        <button class="welcome-input-plus">+</button>
+                        <button class="welcome-input-plus" onclick="openDocsModal()" title="Add documents & system prompt">+</button>
                         <input type="text" id="welcome-input" class="welcome-input" placeholder="Ask anything" onkeypress="if(event.key==='Enter')sendFromWelcome()">
                         <button class="welcome-send-btn" onclick="sendFromWelcome()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1179,6 +1233,11 @@
                                     </div>
                                 </div>
                             </div>
+                            <button class="expand-btn" onclick="toggleExpandPanel('1')" title="Expand">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                </svg>
+                            </button>
                         </div>
                         <div class="chat-messages" id="messages-1"></div>
                     </div>
@@ -1206,6 +1265,11 @@
                                     </div>
                                 </div>
                             </div>
+                            <button class="expand-btn" onclick="toggleExpandPanel('2')" title="Expand">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                </svg>
+                            </button>
                         </div>
                         <div class="chat-messages" id="messages-2"></div>
                     </div>
@@ -1232,6 +1296,11 @@
                                     </div>
                                 </div>
                             </div>
+                            <button class="expand-btn" onclick="toggleExpandPanel('3')" title="Expand">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                </svg>
+                            </button>
                         </div>
                         <div class="chat-messages" id="messages-3"></div>
                     </div>
@@ -1258,6 +1327,11 @@
                                     </div>
                                 </div>
                             </div>
+                            <button class="expand-btn" onclick="toggleExpandPanel('4')" title="Expand">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                </svg>
+                            </button>
                         </div>
                         <div class="chat-messages" id="messages-4"></div>
                     </div>
@@ -1267,7 +1341,7 @@
             <!-- Input Bar - Hidden on welcome, shown when conversation selected -->
             <div id="input-bar" class="input-bar" style="display: none;">
                 <div class="input-container">
-                    <textarea id="message-input" rows="1" placeholder="Message ASHER..."></textarea>
+                    <textarea id="message-input" rows="1" placeholder="Message QuadChat..."></textarea>
                     <button class="send-btn" onclick="sendMessage()" id="send-btn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -1339,26 +1413,62 @@
                 <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- API Keys Note -->
+                <!-- API Keys -->
                 <div class="settings-section">
                     <h4>API Keys</h4>
-                    <p class="api-note">API keys are configured in the backend .env file. Edit <code>ashergo/backend/.env</code> to add your keys.</p>
-                </div>
 
-                <!-- Theme -->
-                <div class="settings-section">
-                    <h4>Appearance</h4>
-                    <div class="theme-toggle-row">
-                        <span>Dark Mode</span>
-                        <label class="theme-switch">
-                            <input type="checkbox" id="theme-toggle" onchange="toggleTheme()">
-                            <span class="theme-slider"></span>
-                        </label>
+                    <div class="api-key-row">
+                        <div class="api-key-label">
+                            <img src="images/logos/openai.webp" alt="OpenAI" class="api-key-logo">
+                            <span>OpenAI</span>
+                            <span id="openai-status" class="api-key-status"></span>
+                        </div>
+                        <div class="api-key-input-row">
+                            <input type="password" id="openai-key" class="api-key-input" placeholder="sk-...">
+                            <button class="api-key-btn" onclick="saveAndTestKey('openai')">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="api-key-row">
+                        <div class="api-key-label">
+                            <img src="images/logos/claude.png" alt="Claude" class="api-key-logo">
+                            <span>Anthropic</span>
+                            <span id="anthropic-status" class="api-key-status"></span>
+                        </div>
+                        <div class="api-key-input-row">
+                            <input type="password" id="anthropic-key" class="api-key-input" placeholder="sk-ant-...">
+                            <button class="api-key-btn" onclick="saveAndTestKey('anthropic')">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="api-key-row">
+                        <div class="api-key-label">
+                            <img src="images/logos/gemini.png" alt="Gemini" class="api-key-logo">
+                            <span>Google</span>
+                            <span id="google-status" class="api-key-status"></span>
+                        </div>
+                        <div class="api-key-input-row">
+                            <input type="password" id="google-key" class="api-key-input" placeholder="AIza...">
+                            <button class="api-key-btn" onclick="saveAndTestKey('google')">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="api-key-row">
+                        <div class="api-key-label">
+                            <img src="images/logos/grok.svg" alt="Grok" class="api-key-logo">
+                            <span>xAI</span>
+                            <span id="xai-status" class="api-key-status"></span>
+                        </div>
+                        <div class="api-key-input-row">
+                            <input type="password" id="xai-key" class="api-key-input" placeholder="xai-...">
+                            <button class="api-key-btn" onclick="saveAndTestKey('xai')">Save</button>
+                        </div>
                     </div>
                 </div>
+
             </div>
             <div class="modal-footer">
-                <button class="modal-btn primary" onclick="closeSettingsModal()">Done</button>
+                <button class="api-key-btn" onclick="closeSettingsModal()">Done</button>
             </div>
         </div>
     </div>
@@ -1387,6 +1497,6 @@
         </div>
     </div>
 
-    <script src="js/ashergo.js?v=7"></script>
+    <script src="js/quadchat.js?v=11"></script>
 </body>
 </html>

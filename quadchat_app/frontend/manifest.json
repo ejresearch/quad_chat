@@ -1,7 +1,7 @@
 {
-  "name": "ASHER - AI Testing Lab",
-  "short_name": "ASHER",
-  "description": "LLM A/B/C/D Testing Platform for comparing AI provider responses",
+  "name": "QuadChat - AI Testing Lab",
+  "short_name": "QuadChat",
+  "description": "Chat with Claude, Grok, ChatGPT, and Gemini at the same time",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#1a1a1a",
