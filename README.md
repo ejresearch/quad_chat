@@ -60,7 +60,7 @@ QuadChat requires an API key for each provider you want to query. Create account
 | OpenAI | https://platform.openai.com/api-keys |
 | Anthropic (Claude) | https://console.anthropic.com/settings/keys |
 | Google (Gemini) | https://ai.google.dev/gemini-api/docs/api-key |
-| xAI (Grok) | https://console.x.ai/ |
+| xAI (Grok) | https://x.ai/api |
 
 Add your keys to `quadchat_app/backend/.env`:
 
