@@ -1,6 +1,6 @@
 """
 AsherGO Backend Server
-AI Provider Testing with Authentication & Saved Conversations
+AI Provider Testing Tool (Local Use)
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
@@ -21,8 +21,7 @@ from ai_providers import AIProviderManager
 from document_parser import DocumentParser
 from document_storage import DocumentStorage
 
-# Import AsherGO routes
-from routes_auth import router as auth_router
+# Import routes (no auth)
 from routes_conversations import router as conversations_router
 from routes_messages import router as messages_router
 from database import init_db
@@ -32,8 +31,8 @@ document_storage = DocumentStorage(storage_path="data/documents.json")
 
 # Create FastAPI app
 app = FastAPI(
-    title="AsherGO - AI Testing Lab",
-    description="AI Provider Testing with Authentication & Saved Conversations",
+    title="ASHER - AI Testing Lab",
+    description="AI Provider Testing Tool for Local Use",
     version="2.0.0"
 )
 
@@ -51,8 +50,7 @@ app.add_middleware(
 async def startup_event():
     init_db()
 
-# Include AsherGO routers
-app.include_router(auth_router)
+# Include routers (no auth)
 app.include_router(conversations_router)
 app.include_router(messages_router)
 
@@ -68,22 +66,6 @@ from fastapi.responses import FileResponse
 @app.get("/index.html")
 async def serve_index():
     return FileResponse(str(frontend_dir / "index.html"))
-
-@app.get("/go")
-async def serve_ashergo():
-    return FileResponse(str(frontend_dir / "ashergo.html"))
-
-@app.get("/ashergo.html")
-async def serve_ashergo_html():
-    return FileResponse(str(frontend_dir / "ashergo.html"))
-
-@app.get("/landing.html")
-async def serve_landing_html():
-    return FileResponse(str(frontend_dir / "landing.html"))
-
-@app.get("/auth.html")
-async def serve_auth_html():
-    return FileResponse(str(frontend_dir / "auth.html"))
 
 @app.get("/manifest.json")
 async def serve_manifest():
@@ -136,10 +118,10 @@ class AsherTestResponse(BaseModel):
     error: Optional[str] = None
 
 
-# Root endpoint - serve the landing page
+# Root endpoint - serve the main app
 @app.get("/")
 async def root():
-    return FileResponse(str(frontend_dir / "landing.html"))
+    return FileResponse(str(frontend_dir / "index.html"))
 
 # API info endpoint
 @app.get("/api")
@@ -166,7 +148,7 @@ def api_info():
 def health_check():
     return {
         "status": "healthy",
-        "service": "AsherGO",
+        "service": "ASHER",
         "version": "2.0.0"
     }
 

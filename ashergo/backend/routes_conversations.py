@@ -1,14 +1,14 @@
 """
-Conversation API routes for AsherGO
+Conversation API routes for ASHER (no auth - local use)
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
+import json
 
-from database import query_one, execute_returning, execute
-from routes_auth import get_current_user
+from database import query_one, execute_returning, execute, get_db
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 
@@ -54,32 +54,48 @@ class ConversationDetail(BaseModel):
     messages: List[Message]
 
 
-@router.get("")
-async def list_conversations(user: dict = Depends(get_current_user)):
-    """List all conversations for the current user"""
-    from database import get_db
-    from psycopg2.extras import RealDictCursor
+def parse_timestamp(ts):
+    """Parse timestamp to ISO format string"""
+    if ts is None:
+        return None
+    if isinstance(ts, str):
+        return ts
+    return ts.isoformat()
 
+
+def parse_json_field(value, default):
+    """Parse a JSON field that might be a string or already parsed"""
+    if value is None:
+        return default
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except:
+            return default
+    return value
+
+
+@router.get("")
+async def list_conversations():
+    """List all conversations"""
     with get_db() as conn:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(
-                """
-                SELECT id, title, created_at, updated_at
-                FROM conversations
-                WHERE user_id = %s
-                ORDER BY updated_at DESC
-                """,
-                (user["id"],)
-            )
-            conversations = cur.fetchall()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT id, title, created_at, updated_at
+            FROM conversations
+            ORDER BY updated_at DESC
+            """
+        )
+        conversations = cur.fetchall()
 
     return {
         "conversations": [
             {
                 "id": c["id"],
                 "title": c["title"],
-                "created_at": c["created_at"].isoformat() if c["created_at"] else None,
-                "updated_at": c["updated_at"].isoformat() if c["updated_at"] else None
+                "created_at": parse_timestamp(c["created_at"]),
+                "updated_at": parse_timestamp(c["updated_at"])
             }
             for c in conversations
         ]
@@ -87,81 +103,77 @@ async def list_conversations(user: dict = Depends(get_current_user)):
 
 
 @router.post("")
-async def create_conversation(request: CreateConversationRequest, user: dict = Depends(get_current_user)):
+async def create_conversation(request: CreateConversationRequest):
     """Create a new conversation"""
-    import json
-
     if not request.title.strip():
         raise HTTPException(status_code=400, detail="Title cannot be empty")
 
     conversation = execute_returning(
         """
-        INSERT INTO conversations (user_id, title, system_prompt, documents)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO conversations (title, system_prompt, documents)
+        VALUES (%s, %s, %s)
         RETURNING id, title, system_prompt, documents, created_at, updated_at
         """,
-        (user["id"], request.title.strip(), request.system_prompt or "", json.dumps(request.documents or []))
+        (request.title.strip(), request.system_prompt or "", json.dumps(request.documents or []))
     )
 
     return {
         "id": conversation["id"],
         "title": conversation["title"],
         "system_prompt": conversation["system_prompt"] or "",
-        "documents": conversation["documents"] or [],
-        "created_at": conversation["created_at"].isoformat() if conversation["created_at"] else None,
-        "updated_at": conversation["updated_at"].isoformat() if conversation["updated_at"] else None
+        "documents": parse_json_field(conversation["documents"], []),
+        "created_at": parse_timestamp(conversation["created_at"]),
+        "updated_at": parse_timestamp(conversation["updated_at"])
     }
 
 
 @router.get("/{conversation_id}")
-async def get_conversation(conversation_id: int, user: dict = Depends(get_current_user)):
+async def get_conversation(conversation_id: int):
     """Get a single conversation with all messages"""
-    from database import get_db
-    from psycopg2.extras import RealDictCursor
-
     with get_db() as conn:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Get conversation
-            cur.execute(
-                """
-                SELECT id, title, system_prompt, documents, provider_settings, created_at, updated_at
-                FROM conversations
-                WHERE id = %s AND user_id = %s
-                """,
-                (conversation_id, user["id"])
-            )
-            conversation = cur.fetchone()
+        cur = conn.cursor()
 
-            if not conversation:
-                raise HTTPException(status_code=404, detail="Conversation not found")
+        # Get conversation
+        cur.execute(
+            """
+            SELECT id, title, system_prompt, documents, provider_settings, created_at, updated_at
+            FROM conversations
+            WHERE id = ?
+            """,
+            (conversation_id,)
+        )
+        conversation = cur.fetchone()
 
-            # Get messages (order by id to ensure user messages come before their responses)
-            cur.execute(
-                """
-                SELECT id, role, content, model, timestamp
-                FROM messages
-                WHERE conversation_id = %s
-                ORDER BY id ASC
-                """,
-                (conversation_id,)
-            )
-            messages = cur.fetchall()
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        # Get messages (order by id to ensure user messages come before their responses)
+        cur.execute(
+            """
+            SELECT id, role, content, model, timestamp
+            FROM messages
+            WHERE conversation_id = ?
+            ORDER BY id ASC
+            """,
+            (conversation_id,)
+        )
+        messages = cur.fetchall()
 
     return {
         "id": conversation["id"],
         "title": conversation["title"],
         "system_prompt": conversation["system_prompt"] or "",
-        "documents": conversation["documents"] or [],
-        "provider_settings": conversation["provider_settings"] or {},
-        "created_at": conversation["created_at"].isoformat() if conversation["created_at"] else None,
-        "updated_at": conversation["updated_at"].isoformat() if conversation["updated_at"] else None,
+        "documents": parse_json_field(conversation["documents"], []),
+        "provider_settings": parse_json_field(conversation["provider_settings"], {}),
+        "created_at": parse_timestamp(conversation["created_at"]),
+        "updated_at": parse_timestamp(conversation["updated_at"]),
         "messages": [
             {
                 "id": m["id"],
                 "role": m["role"],
                 "content": m["content"],
                 "model": m["model"],
-                "timestamp": m["timestamp"].isoformat() if m["timestamp"] else None
+                "timestamp": parse_timestamp(m["timestamp"])
             }
             for m in messages
         ]
@@ -171,16 +183,13 @@ async def get_conversation(conversation_id: int, user: dict = Depends(get_curren
 @router.patch("/{conversation_id}")
 async def update_conversation(
     conversation_id: int,
-    request: UpdateConversationRequest,
-    user: dict = Depends(get_current_user)
+    request: UpdateConversationRequest
 ):
     """Update a conversation (title, system_prompt, documents)"""
-    import json
-
-    # Check ownership
+    # Check if conversation exists
     conversation = query_one(
-        "SELECT id FROM conversations WHERE id = %s AND user_id = %s",
-        (conversation_id, user["id"])
+        "SELECT id FROM conversations WHERE id = %s",
+        (conversation_id,)
     )
 
     if not conversation:
@@ -193,19 +202,19 @@ async def update_conversation(
     if request.title is not None:
         if not request.title.strip():
             raise HTTPException(status_code=400, detail="Title cannot be empty")
-        updates.append("title = %s")
+        updates.append("title = ?")
         params.append(request.title.strip())
 
     if request.system_prompt is not None:
-        updates.append("system_prompt = %s")
+        updates.append("system_prompt = ?")
         params.append(request.system_prompt)
 
     if request.documents is not None:
-        updates.append("documents = %s")
+        updates.append("documents = ?")
         params.append(json.dumps(request.documents))
 
     if request.provider_settings is not None:
-        updates.append("provider_settings = %s")
+        updates.append("provider_settings = ?")
         params.append(json.dumps(request.provider_settings))
 
     if not updates:
@@ -218,7 +227,7 @@ async def update_conversation(
         f"""
         UPDATE conversations
         SET {', '.join(updates)}
-        WHERE id = %s
+        WHERE id = ?
         RETURNING id, title, system_prompt, documents, provider_settings, created_at, updated_at
         """,
         tuple(params)
@@ -228,26 +237,27 @@ async def update_conversation(
         "id": updated["id"],
         "title": updated["title"],
         "system_prompt": updated["system_prompt"] or "",
-        "documents": updated["documents"] or [],
-        "provider_settings": updated["provider_settings"] or {},
-        "created_at": updated["created_at"].isoformat() if updated["created_at"] else None,
-        "updated_at": updated["updated_at"].isoformat() if updated["updated_at"] else None
+        "documents": parse_json_field(updated["documents"], []),
+        "provider_settings": parse_json_field(updated["provider_settings"], {}),
+        "created_at": parse_timestamp(updated["created_at"]),
+        "updated_at": parse_timestamp(updated["updated_at"])
     }
 
 
 @router.delete("/{conversation_id}")
-async def delete_conversation(conversation_id: int, user: dict = Depends(get_current_user)):
+async def delete_conversation(conversation_id: int):
     """Delete a conversation and all its messages"""
-    # Check ownership
+    # Check if exists
     conversation = query_one(
-        "SELECT id, title FROM conversations WHERE id = %s AND user_id = %s",
-        (conversation_id, user["id"])
+        "SELECT id, title FROM conversations WHERE id = %s",
+        (conversation_id,)
     )
 
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    # Delete (messages cascade automatically due to ON DELETE CASCADE)
+    # Delete messages first (SQLite foreign keys need explicit enable)
+    execute("DELETE FROM messages WHERE conversation_id = %s", (conversation_id,))
     execute("DELETE FROM conversations WHERE id = %s", (conversation_id,))
 
     return {

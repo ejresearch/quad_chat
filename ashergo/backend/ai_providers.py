@@ -241,8 +241,8 @@ class AIProviderManager:
         "openai-gpt4-turbo": {"class": OpenAIProvider, "model": "gpt-4-turbo", "name": "OpenAI GPT-4 Turbo", "key_name": "openai"},
         "openai-o3": {"class": OpenAIProvider, "model": "o3", "name": "OpenAI o3", "key_name": "openai"},
         "openai-o4-mini": {"class": OpenAIProvider, "model": "o4-mini", "name": "OpenAI o4-mini", "key_name": "openai"},
-        # Generic openai provider - defaults to latest
-        "openai": {"class": OpenAIProvider, "model": "gpt-5.1", "name": "OpenAI", "key_name": "openai"},
+        # Generic openai provider - defaults to stable gpt-4o
+        "openai": {"class": OpenAIProvider, "model": "gpt-4o", "name": "OpenAI", "key_name": "openai"},
 
         # Anthropic Claude - Latest Models (Dec 2025)
         # Opus 4.5 is the latest and most capable
@@ -251,8 +251,8 @@ class AIProviderManager:
         "claude-haiku-4.5": {"class": ClaudeProvider, "model": "claude-3-5-haiku-20251015", "name": "Claude Haiku 4.5", "key_name": "anthropic"},
         "claude-opus-4.1": {"class": ClaudeProvider, "model": "claude-opus-4-1-20250805", "name": "Claude Opus 4.1", "key_name": "anthropic"},
         "claude-sonnet-4": {"class": ClaudeProvider, "model": "claude-sonnet-4-20250514", "name": "Claude Sonnet 4", "key_name": "anthropic"},
-        # Generic claude provider - defaults to latest sonnet
-        "claude": {"class": ClaudeProvider, "model": "claude-sonnet-4-5-20250929", "name": "Claude", "key_name": "anthropic"},
+        # Generic claude provider - defaults to stable haiku
+        "claude": {"class": ClaudeProvider, "model": "claude-3-haiku-20240307", "name": "Claude", "key_name": "anthropic"},
 
         # Google Gemini - Latest Models (Dec 2025)
         # Based on API query - actual available models
@@ -261,8 +261,8 @@ class AIProviderManager:
         "gemini-2.5-pro": {"class": GeminiProvider, "model": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "key_name": "google"},
         "gemini-2.5-flash": {"class": GeminiProvider, "model": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "key_name": "google"},
         "gemini-2.0-flash": {"class": GeminiProvider, "model": "gemini-2.0-flash", "name": "Gemini 2.0 Flash", "key_name": "google"},
-        # Generic gemini provider - defaults to stable 2.5 Pro
-        "gemini": {"class": GeminiProvider, "model": "gemini-2.5-pro", "name": "Gemini", "key_name": "google"},
+        # Generic gemini provider - defaults to stable 2.0 flash
+        "gemini": {"class": GeminiProvider, "model": "gemini-2.0-flash", "name": "Gemini", "key_name": "google"},
 
         # xAI Grok - Latest Models (Dec 2025)
         # Based on API query - actual available models

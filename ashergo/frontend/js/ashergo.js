@@ -1,69 +1,62 @@
-// AsherGO - Main Application JavaScript
+// ASHER - AI Provider Testing Tool (Local Use, No Auth)
 
-// Auto-detect API base - use same origin (works for both local and production)
 const API_BASE = window.location.origin;
 
 // State
-let authToken = localStorage.getItem('ashergo_token');
-let currentUser = null;
 let currentConversation = null;
 let conversations = [];
 let currentTab = 'all';
 let referenceDocuments = [];
 
-// Provider configuration (static info)
+// Provider configuration
 const PROVIDER_INFO = {
-    '1': { id: 'openai', name: 'ChatGPT', defaultModel: 'gpt-5.1' },
-    '2': { id: 'claude', name: 'Claude', defaultModel: 'claude-sonnet-4.5' },
-    '3': { id: 'gemini', name: 'Gemini', defaultModel: 'gemini-2.5-pro' },
-    '4': { id: 'grok', name: 'Grok', defaultModel: 'grok-4.1-fast' }
+    '1': { id: 'openai', name: 'ChatGPT', defaultModel: 'gpt-4o' },
+    '2': { id: 'claude', name: 'Claude', defaultModel: 'claude-3-haiku-20240307' },
+    '3': { id: 'gemini', name: 'Gemini', defaultModel: 'gemini-2.0-flash' },
+    '4': { id: 'grok', name: 'Grok', defaultModel: 'grok-3' }
 };
 
-// Enabled providers (Set-based like main ASHER branch)
-let enabledProviders = new Set(['1', '2', '3', '4']); // All enabled by default
+// Enabled providers
+let enabledProviders = new Set(['1', '2', '3', '4']);
 
 // Selected models per provider
 let providerModels = {
-    '1': 'gpt-5.1',
-    '2': 'claude-sonnet-4.5',
-    '3': 'gemini-2.5-pro',
-    '4': 'grok-4.1-fast'
+    '1': 'gpt-4o',
+    '2': 'claude-3-haiku-20240307',
+    '3': 'gemini-2.0-flash',
+    '4': 'grok-3'
 };
 
-// Reset providers to defaults (for new conversations)
+// Reset providers to defaults
 function resetProvidersToDefault() {
     enabledProviders = new Set(['1', '2', '3', '4']);
     providerModels = {
-        '1': 'gpt-5.1',
-        '2': 'claude-sonnet-4.5',
-        '3': 'gemini-2.5-pro',
-        '4': 'grok-4.1-fast'
+        '1': 'gpt-4o',
+        '2': 'claude-3-haiku-20240307',
+        '3': 'gemini-2.0-flash',
+        '4': 'grok-3'
     };
     initProviderUI();
 }
 
 // Load provider settings from conversation data
 function loadProviderSettings(settings) {
-    // Start with defaults
     enabledProviders = new Set(['1', '2', '3', '4']);
     providerModels = {
-        '1': 'gpt-5.1',
-        '2': 'claude-sonnet-4.5',
-        '3': 'gemini-2.5-pro',
-        '4': 'grok-4.1-fast'
+        '1': 'gpt-4o',
+        '2': 'claude-3-haiku-20240307',
+        '3': 'gemini-2.0-flash',
+        '4': 'grok-3'
     };
 
-    // Apply saved settings if any
     if (settings && Object.keys(settings).length > 0) {
         Object.keys(settings).forEach(num => {
             if (PROVIDER_INFO[num]) {
-                // Handle enabled state
                 if (settings[num].enabled === false) {
                     enabledProviders.delete(num);
                 } else {
                     enabledProviders.add(num);
                 }
-                // Handle model
                 if (settings[num].model) {
                     providerModels[num] = settings[num].model;
                 }
@@ -87,15 +80,11 @@ async function saveProviderSettings() {
     });
 
     try {
-        const response = await fetch(`${API_BASE}/api/conversations/${currentConversation.id}`, {
+        await fetch(`${API_BASE}/api/conversations/${currentConversation.id}`, {
             method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ provider_settings: settings })
         });
-        await response.json();
     } catch (error) {
         console.error('Error saving provider settings:', error);
     }
@@ -127,16 +116,12 @@ function initProviderUI() {
 // Toggle provider popover
 function toggleProviderPopover(num, event) {
     event.stopPropagation();
-
-    // Close any open popovers first
     document.querySelectorAll('.provider-popover').forEach(p => {
         if (p.id !== `popover-${num}`) {
             p.classList.remove('visible');
         }
     });
-
-    const popover = document.getElementById(`popover-${num}`);
-    popover.classList.toggle('visible');
+    document.getElementById(`popover-${num}`).classList.toggle('visible');
 }
 
 // Close popovers when clicking outside
@@ -154,10 +139,8 @@ function toggleProvider(num) {
     const panel = document.getElementById(`panel-${num}`);
     const tab = document.querySelector(`.tab[data-tab="${num}"]`);
 
-    const wasEnabled = enabledProviders.has(num);
     const isNowEnabled = toggle.checked;
 
-    // Update the Set
     if (isNowEnabled) {
         enabledProviders.add(num);
     } else {
@@ -171,7 +154,6 @@ function toggleProvider(num) {
 
     saveProviderSettings();
 
-    // Re-render messages to show/hide based on enabled state
     if (currentConversation) {
         renderMessages();
     }
@@ -186,24 +168,16 @@ function setProviderModel(num, model) {
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
-    if (authToken) {
-        checkAuth();
-    } else {
-        showAuthScreen();
-    }
+    loadConversations();
     setupEventListeners();
 
-    // Close popovers when clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.provider-badge') && !e.target.closest('.provider-popover')) {
             closeAllPopovers();
         }
     });
 
-    // Initialize provider UI with defaults
     initProviderUI();
-
-    // Start logo provider carousel rotation
     startLogoCarousel();
 });
 
@@ -233,7 +207,6 @@ function loadTheme() {
     if (savedTheme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
     }
-    // Set toggle checkbox state when settings modal opens
     const toggle = document.getElementById('theme-toggle');
     if (toggle) {
         toggle.checked = savedTheme === 'dark';
@@ -255,10 +228,6 @@ function toggleTheme() {
 
 // Event Listeners
 function setupEventListeners() {
-    // Login form
-    document.getElementById('login-form').addEventListener('submit', handleLogin);
-    document.getElementById('signup-form').addEventListener('submit', handleSignup);
-
     // Message input
     const input = document.getElementById('message-input');
     input.addEventListener('keydown', (e) => {
@@ -268,7 +237,6 @@ function setupEventListeners() {
         }
     });
 
-    // Auto-resize textarea
     input.addEventListener('input', () => {
         input.style.height = 'auto';
         input.style.height = Math.min(input.scrollHeight, 120) + 'px';
@@ -285,15 +253,12 @@ function setupEventListeners() {
     // Document upload
     document.getElementById('doc-upload').addEventListener('change', handleDocumentUpload);
 
-    // Global keyboard shortcuts
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-        // Check if user is typing in an input field
         const isTyping = document.activeElement.tagName === 'INPUT' ||
                          document.activeElement.tagName === 'TEXTAREA';
 
-        // Escape key - toggle sidebar or close modals
         if (e.key === 'Escape') {
-            // Check if any modal is open and close it
             const settingsModal = document.getElementById('settings-modal');
             const docsModal = document.getElementById('docs-modal');
             const newConvoModal = document.getElementById('new-convo-modal');
@@ -305,22 +270,16 @@ function setupEventListeners() {
             } else if (newConvoModal.style.display === 'flex') {
                 closeNewConvoModal();
             } else {
-                // No modal open - toggle sidebar
                 toggleSidebar();
             }
         }
 
-        // 1-4: Toggle providers (when not typing)
         if (!isTyping && ['1', '2', '3', '4'].includes(e.key)) {
             e.preventDefault();
-            // Click the toggle checkbox to trigger the existing toggleProvider function
             const toggle = document.getElementById(`toggle-${e.key}`);
-            if (toggle) {
-                toggle.click();
-            }
+            if (toggle) toggle.click();
         }
 
-        // Shift+? - Show keyboard shortcuts
         if (e.key === '?' && e.shiftKey && !isTyping) {
             e.preventDefault();
             showKeyboardShortcuts();
@@ -375,164 +334,10 @@ function showKeyboardShortcuts() {
     document.body.appendChild(modal);
 }
 
-// Auth Functions
-function showAuthScreen() {
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('main-app').style.display = 'none';
-}
-
-function showMainApp() {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'flex';
-    loadConversations();
-    loadUserInfo();
-}
-
-function showLoginForm() {
-    document.getElementById('login-form').style.display = 'block';
-    document.getElementById('signup-form').style.display = 'none';
-}
-
-function showSignupForm() {
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('signup-form').style.display = 'block';
-}
-
-async function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    const errorDiv = document.getElementById('login-error');
-
-    try {
-        const response = await fetch(`${API_BASE}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        // Handle non-JSON responses (like 502 error pages)
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Server error (${response.status}). Please try again.`);
-        }
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.detail || 'Login failed');
-        }
-
-        authToken = data.token;
-        currentUser = data.user;
-        localStorage.setItem('ashergo_token', authToken);
-        showMainApp();
-    } catch (error) {
-        errorDiv.textContent = error.message;
-    }
-}
-
-async function handleSignup(e) {
-    e.preventDefault();
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    const errorDiv = document.getElementById('signup-error');
-
-    try {
-        const response = await fetch(`${API_BASE}/api/auth/signup`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        // Handle non-JSON responses (like 502 error pages)
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Server error (${response.status}). Please try again.`);
-        }
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.detail || 'Signup failed');
-        }
-
-        authToken = data.token;
-        currentUser = data.user;
-        localStorage.setItem('ashergo_token', authToken);
-        showMainApp();
-    } catch (error) {
-        errorDiv.textContent = error.message;
-    }
-}
-
-async function checkAuth() {
-    try {
-        const response = await fetch(`${API_BASE}/api/auth/me`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-
-        // Handle non-JSON responses (like 502 error pages)
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error('Server error');
-        }
-
-        if (!response.ok) {
-            throw new Error('Invalid token');
-        }
-
-        currentUser = await response.json();
-        showMainApp();
-    } catch (error) {
-        localStorage.removeItem('ashergo_token');
-        authToken = null;
-        showAuthScreen();
-    }
-}
-
-function logout() {
-    localStorage.removeItem('ashergo_token');
-    authToken = null;
-    currentUser = null;
-    currentConversation = null;
-    conversations = [];
-    closeSettingsModal();
-    showAuthScreen();
-}
-
-// User Info
-function loadUserInfo() {
-    if (currentUser) {
-        document.getElementById('user-email').textContent = `Email: ${currentUser.email}`;
-        let status = currentUser.subscription_status;
-        if (status === 'trial' && currentUser.trial_ends_at) {
-            const days = Math.ceil((new Date(currentUser.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
-            status = `Trial (${days} days left)`;
-        }
-        document.getElementById('subscription-status').textContent = `Status: ${status}`;
-
-        // Update welcome heading with user's first name
-        const welcomeHeading = document.getElementById('welcome-heading');
-        if (welcomeHeading && currentUser.first_name) {
-            welcomeHeading.textContent = `Hi, ${currentUser.first_name}! Welcome to AsherGO`;
-        }
-    }
-}
-
 // Conversations
 async function loadConversations() {
     try {
-        const response = await fetch(`${API_BASE}/api/conversations`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-
-        // Handle non-JSON responses (like 502 error pages)
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Server error (${response.status}). Please try again.`);
-        }
-
+        const response = await fetch(`${API_BASE}/api/conversations`);
         const data = await response.json();
         conversations = data.conversations || [];
         renderConversationList();
@@ -560,26 +365,15 @@ function renderConversationList() {
 
 async function selectConversation(id, skipProviderReload = false) {
     try {
-        const response = await fetch(`${API_BASE}/api/conversations/${id}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-
-        // Handle non-JSON responses (like 502 error pages)
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Server error (${response.status}). Please try again.`);
-        }
-
+        const response = await fetch(`${API_BASE}/api/conversations/${id}`);
         if (!response.ok) throw new Error('Failed to load conversation');
 
         currentConversation = await response.json();
 
-        // Load conversation's system prompt and documents into the UI
         document.getElementById('system-prompt').value = currentConversation.system_prompt || '';
         referenceDocuments = currentConversation.documents || [];
         renderDocumentList();
 
-        // Load provider settings for this conversation (skip if just refreshing messages)
         if (!skipProviderReload) {
             loadProviderSettings(currentConversation.provider_settings);
         }
@@ -594,8 +388,6 @@ async function selectConversation(id, skipProviderReload = false) {
 function showConversation() {
     document.getElementById('empty-state').style.display = 'none';
     document.getElementById('input-bar').style.display = 'block';
-
-    // Render messages based on current tab
     renderMessages();
 }
 
@@ -603,21 +395,16 @@ function renderMessages() {
     const messages = currentConversation?.messages || [];
 
     if (currentTab === 'all') {
-        // Grid view
         document.getElementById('single-view').style.display = 'none';
         document.getElementById('grid-view').style.display = 'grid';
 
-        // Clear all panels
         ['1', '2', '3', '4'].forEach(num => {
-            const container = document.getElementById(`messages-${num}`);
-            container.innerHTML = '';
+            document.getElementById(`messages-${num}`).innerHTML = '';
         });
 
-        // First, determine which providers have responded to each user message
-        // Build a map of user message index -> set of providers that responded
         const userMessageProviders = {};
         let userMsgIndex = -1;
-        messages.forEach((msg, i) => {
+        messages.forEach(msg => {
             if (msg.role === 'user') {
                 userMsgIndex++;
                 userMessageProviders[userMsgIndex] = new Set();
@@ -629,13 +416,11 @@ function renderMessages() {
             }
         });
 
-        // Now render messages - only show user messages in panels that responded
         userMsgIndex = -1;
         messages.forEach(msg => {
             const panelNum = getProviderPanel(msg.model);
             if (msg.role === 'user') {
                 userMsgIndex++;
-                // Only add to panels that have a response for this message AND are enabled
                 const respondedPanels = userMessageProviders[userMsgIndex] || new Set();
                 respondedPanels.forEach(num => {
                     if (enabledProviders.has(num)) {
@@ -647,13 +432,11 @@ function renderMessages() {
             }
         });
     } else {
-        // Single view - only show if provider is enabled
         if (!enabledProviders.has(currentTab)) {
-            // Provider is disabled, switch to 'all' view
             currentTab = 'all';
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector('.tab-btn[data-tab="all"]')?.classList.add('active');
-            renderMessages(); // Re-render in grid view
+            renderMessages();
             return;
         }
 
@@ -686,8 +469,7 @@ function getProviderPanel(model) {
 }
 
 function matchesProvider(model, tab) {
-    const panel = getProviderPanel(model);
-    return panel === tab;
+    return getProviderPanel(model) === tab;
 }
 
 function addMessageToPanel(panelNum, role, content) {
@@ -702,13 +484,10 @@ function addMessageToPanel(panelNum, role, content) {
 // Build context from system prompt and reference documents
 function buildContext() {
     const systemPrompt = document.getElementById('system-prompt').value.trim();
-
     let context = systemPrompt;
 
-    // Add reference documents
     if (referenceDocuments.length > 0) {
         context += '\n\n=== REFERENCE DOCUMENTS ===\n\n';
-
         referenceDocuments.forEach(doc => {
             if (doc.content && doc.content.trim()) {
                 context += `--- ${doc.filename} ---\n${doc.content}\n\n`;
@@ -735,10 +514,7 @@ async function sendMessage() {
     input.value = '';
     input.style.height = 'auto';
 
-    // Build context from system prompt AND reference documents
     const systemContext = buildContext();
-
-    // Get enabled provider numbers from the Set
     const activeProviderNums = Array.from(enabledProviders);
 
     if (activeProviderNums.length === 0) {
@@ -747,13 +523,11 @@ async function sendMessage() {
         return;
     }
 
-    // Add user message to UI immediately for enabled providers
     activeProviderNums.forEach(num => {
         addMessageToPanel(num, 'user', message);
         addLoadingToPanel(num);
     });
 
-    // Also show in single view if on a single tab
     if (currentTab !== 'all') {
         const container = document.getElementById('single-messages');
         const userDiv = document.createElement('div');
@@ -769,7 +543,6 @@ async function sendMessage() {
         container.scrollTop = container.scrollHeight;
     }
 
-    // Send to ALL enabled providers regardless of current tab
     const promises = activeProviderNums.map((num, index) => {
         const providerInfo = PROVIDER_INFO[num];
         const model = providerModels[num];
@@ -778,8 +551,6 @@ async function sendMessage() {
     await Promise.all(promises);
 
     sendBtn.disabled = false;
-
-    // Reload conversation to get saved messages (but keep current provider settings)
     await selectConversation(currentConversation.id, true);
 }
 
@@ -787,10 +558,7 @@ async function sendToProvider(providerId, message, systemPrompt, panelNum, skipU
     try {
         const response = await fetch(`${API_BASE}/api/conversations/${currentConversation.id}/messages`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 message,
                 provider: providerId,
@@ -800,14 +568,7 @@ async function sendToProvider(providerId, message, systemPrompt, panelNum, skipU
             })
         });
 
-        // Remove loading indicator
         removeLoadingFromPanel(panelNum);
-
-        // Handle non-JSON responses (like 502 error pages)
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Server error (${response.status}). Please try again.`);
-        }
 
         const data = await response.json();
 
@@ -815,7 +576,6 @@ async function sendToProvider(providerId, message, systemPrompt, panelNum, skipU
             throw new Error(data.detail || 'Failed to send message');
         }
 
-        // Add assistant response
         if (currentTab === 'all') {
             addMessageToPanel(panelNum, 'assistant', data.assistant_message.content);
         } else {
@@ -829,7 +589,6 @@ async function sendToProvider(providerId, message, systemPrompt, panelNum, skipU
     } catch (error) {
         removeLoadingFromPanel(panelNum);
 
-        // Check if it's an API key error
         if (error.message.includes('API key not configured')) {
             showApiKeyAlert(error.message);
         } else if (currentTab === 'all') {
@@ -844,13 +603,10 @@ async function sendToProvider(providerId, message, systemPrompt, panelNum, skipU
     }
 }
 
-// Track missing API keys to show combined alert
 let missingApiKeyProviders = new Set();
 let apiKeyAlertTimeout = null;
 
-// Show API key missing alert
 function showApiKeyAlert(message) {
-    // Extract provider name from message
     let providerName = null;
     if (message.includes('OpenAI')) providerName = 'ChatGPT';
     else if (message.includes('Anthropic')) providerName = 'Claude';
@@ -861,7 +617,6 @@ function showApiKeyAlert(message) {
         missingApiKeyProviders.add(providerName);
     }
 
-    // Debounce to collect all missing providers before showing alert
     if (apiKeyAlertTimeout) {
         clearTimeout(apiKeyAlertTimeout);
     }
@@ -884,18 +639,12 @@ function showApiKeyAlert(message) {
         document.getElementById('api-key-alert-provider').textContent = displayText;
         document.getElementById('api-key-alert').style.display = 'flex';
 
-        // Reset for next time
         missingApiKeyProviders.clear();
     }, 300);
 }
 
 function closeApiKeyAlert() {
     document.getElementById('api-key-alert').style.display = 'none';
-}
-
-function goToSettingsFromAlert() {
-    closeApiKeyAlert();
-    openSettingsModal();
 }
 
 function addLoadingToPanel(panelNum) {
@@ -934,18 +683,9 @@ async function createConversation() {
     try {
         const response = await fetch(`${API_BASE}/api/conversations`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title })
         });
-
-        // Handle non-JSON responses (like 502 error pages)
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Server error (${response.status}). Please try again.`);
-        }
 
         if (!response.ok) throw new Error('Failed to create conversation');
 
@@ -964,8 +704,7 @@ async function deleteConversation(id) {
 
     try {
         await fetch(`${API_BASE}/api/conversations/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            method: 'DELETE'
         });
 
         if (currentConversation?.id === id) {
@@ -984,19 +723,16 @@ async function deleteConversation(id) {
 
 // Tab Switching
 function switchTab(tab) {
-    // Don't allow switching to disabled provider tabs
     if (tab !== 'all' && !enabledProviders.has(tab)) {
         return;
     }
 
     currentTab = tab;
 
-    // Update tab UI
     document.querySelectorAll('.tab').forEach(t => {
         t.classList.toggle('active', t.dataset.tab === tab);
     });
 
-    // Re-render messages if conversation is selected
     if (currentConversation) {
         renderMessages();
     }
@@ -1008,7 +744,6 @@ function toggleSidebar() {
     const toggle = document.getElementById('sidebar-toggle');
     sidebar.classList.toggle('collapsed');
 
-    // Show/hide the hamburger button based on sidebar state
     if (sidebar.classList.contains('collapsed')) {
         toggle.classList.add('visible');
     } else {
@@ -1034,24 +769,19 @@ function openDocsModal() {
 async function closeDocsModal() {
     document.getElementById('docs-modal').style.display = 'none';
 
-    // Save system prompt and documents to the current conversation
     if (currentConversation) {
         const systemPrompt = document.getElementById('system-prompt').value;
 
         try {
             await fetch(`${API_BASE}/api/conversations/${currentConversation.id}`, {
                 method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     system_prompt: systemPrompt,
                     documents: referenceDocuments
                 })
             });
 
-            // Update local state
             currentConversation.system_prompt = systemPrompt;
             currentConversation.documents = referenceDocuments;
         } catch (error) {
@@ -1104,7 +834,6 @@ async function handleDocumentUpload(e) {
 
             const result = await response.json();
 
-            // Add to reference documents
             referenceDocuments.push({
                 id: result.id,
                 filename: result.filename,
@@ -1119,81 +848,17 @@ async function handleDocumentUpload(e) {
         }
     }
 
-    // Clear the input
     e.target.value = '';
 }
 
-async function openSettingsModal() {
+function openSettingsModal() {
     document.getElementById('settings-modal').style.display = 'flex';
-    loadUserInfo();
-
-    // Load saved API keys from server
-    try {
-        const response = await fetch(`${API_BASE}/api/auth/api-keys`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        if (response.ok) {
-            const keys = await response.json();
-            // Show masked keys as placeholder, clear value for new input
-            document.getElementById('openai-key').value = '';
-            document.getElementById('anthropic-key').value = '';
-            document.getElementById('google-key').value = '';
-            document.getElementById('xai-key').value = '';
-
-            document.getElementById('openai-key').placeholder = keys.has_openai ? keys.openai : 'sk-...';
-            document.getElementById('anthropic-key').placeholder = keys.has_anthropic ? keys.anthropic : 'sk-ant-...';
-            document.getElementById('google-key').placeholder = keys.has_google ? keys.google : 'AIza...';
-            document.getElementById('xai-key').placeholder = keys.has_xai ? keys.xai : 'xai-...';
-        }
-    } catch (error) {
-        console.error('Error loading API keys:', error);
-    }
-
-    // Set theme toggle state
     const savedTheme = localStorage.getItem('asher-theme') || 'dark';
     document.getElementById('theme-toggle').checked = savedTheme === 'dark';
 }
 
 function closeSettingsModal() {
     document.getElementById('settings-modal').style.display = 'none';
-}
-
-async function saveSettings() {
-    // Build request with only non-empty keys
-    const keys = {};
-    const openai = document.getElementById('openai-key').value.trim();
-    const anthropic = document.getElementById('anthropic-key').value.trim();
-    const google = document.getElementById('google-key').value.trim();
-    const xai = document.getElementById('xai-key').value.trim();
-
-    if (openai) keys.openai = openai;
-    if (anthropic) keys.anthropic = anthropic;
-    if (google) keys.google = google;
-    if (xai) keys.xai = xai;
-
-    // Only save if there are keys to update
-    if (Object.keys(keys).length > 0) {
-        try {
-            const response = await fetch(`${API_BASE}/api/auth/api-keys`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(keys)
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to save API keys');
-            }
-        } catch (error) {
-            console.error('Error saving API keys:', error);
-            alert('Failed to save API keys');
-            return;
-        }
-    }
-
-    closeSettingsModal();
 }
 
 // Utilities

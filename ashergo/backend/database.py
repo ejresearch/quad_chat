@@ -1,25 +1,31 @@
 """
-Database connection and helper functions for AsherGO
+Database connection and helper functions for ASHER (local use)
+Uses SQLite for zero-configuration local storage
 """
 
+import sqlite3
+import json
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
-from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+# Database file location - in data/ directory
+DATA_DIR = Path(__file__).parent / "data"
+DATA_DIR.mkdir(exist_ok=True)
+DB_PATH = DATA_DIR / "asher.db"
 
-# Get DATABASE_URL and fix postgres:// to postgresql:// for psycopg2 compatibility
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/ashergo")
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+def dict_factory(cursor, row):
+    """Convert SQLite rows to dictionaries"""
+    fields = [column[0] for column in cursor.description]
+    return {key: value for key, value in zip(fields, row)}
 
 
 @contextmanager
 def get_db():
     """Get a database connection with automatic cleanup"""
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = dict_factory
     try:
         yield conn
         conn.commit()
@@ -32,111 +38,108 @@ def get_db():
 
 def query(sql, params=None, fetch_one=False):
     """Execute a query and return results as dictionaries"""
+    # Convert %s to ? for SQLite
+    sql = sql.replace('%s', '?')
     with get_db() as conn:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(sql, params)
-            if fetch_one:
-                return dict(cur.fetchone()) if cur.fetchone() else None
-            return [dict(row) for row in cur.fetchall()]
+        cur = conn.cursor()
+        cur.execute(sql, params or ())
+        if fetch_one:
+            row = cur.fetchone()
+            return row if row else None
+        return cur.fetchall()
 
 
 def query_one(sql, params=None):
     """Execute a query and return a single result"""
+    sql = sql.replace('%s', '?')
     with get_db() as conn:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(sql, params)
-            row = cur.fetchone()
-            return dict(row) if row else None
+        cur = conn.cursor()
+        cur.execute(sql, params or ())
+        return cur.fetchone()
 
 
 def execute(sql, params=None):
     """Execute a query without returning results"""
+    sql = sql.replace('%s', '?')
     with get_db() as conn:
-        with conn.cursor() as cur:
-            cur.execute(sql, params)
+        cur = conn.cursor()
+        cur.execute(sql, params or ())
 
 
 def execute_returning(sql, params=None):
-    """Execute a query and return the result (for INSERT RETURNING)"""
+    """Execute an INSERT and return the inserted row"""
+    import re
+
+    sql = sql.replace('%s', '?')
+
+    # Remove RETURNING clause for SQLite
+    if 'RETURNING' in sql.upper():
+        sql = re.split(r'\bRETURNING\b', sql, flags=re.IGNORECASE)[0].strip()
+
     with get_db() as conn:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(sql, params)
-            row = cur.fetchone()
-            return dict(row) if row else None
+        cur = conn.cursor()
+        sql_upper = sql.upper()
+
+        if 'INSERT INTO' in sql_upper:
+            # Extract table name using regex
+            match = re.search(r'INSERT\s+INTO\s+(\w+)', sql, re.IGNORECASE)
+            table = match.group(1) if match else None
+
+            cur.execute(sql, params or ())
+            row_id = cur.lastrowid
+
+            if table and row_id:
+                cur.execute(f"SELECT * FROM {table} WHERE id = ?", (row_id,))
+                return cur.fetchone()
+
+        elif 'UPDATE' in sql_upper:
+            # Extract table name using regex
+            match = re.search(r'UPDATE\s+(\w+)', sql, re.IGNORECASE)
+            table = match.group(1) if match else None
+
+            cur.execute(sql, params or ())
+
+            # The ID is the last parameter
+            row_id = params[-1] if params else None
+            if table and row_id:
+                cur.execute(f"SELECT * FROM {table} WHERE id = ?", (row_id,))
+                return cur.fetchone()
+
+        return None
 
 
 def init_db():
     """Initialize database tables if they don't exist"""
     with get_db() as conn:
-        with conn.cursor() as cur:
-            # Users table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    id SERIAL PRIMARY KEY,
-                    email VARCHAR(255) UNIQUE NOT NULL,
-                    password_hash VARCHAR(255) NOT NULL,
-                    first_name VARCHAR(100),
-                    subscription_status VARCHAR(50) DEFAULT 'trial',
-                    trial_ends_at TIMESTAMP,
-                    api_keys JSONB DEFAULT '{}',
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
+        cur = conn.cursor()
 
-            # Add missing columns to users table if they don't exist
-            cur.execute("""
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='first_name') THEN
-                        ALTER TABLE users ADD COLUMN first_name VARCHAR(100);
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='subscription_status') THEN
-                        ALTER TABLE users ADD COLUMN subscription_status VARCHAR(50) DEFAULT 'trial';
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='trial_ends_at') THEN
-                        ALTER TABLE users ADD COLUMN trial_ends_at TIMESTAMP;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='api_keys') THEN
-                        ALTER TABLE users ADD COLUMN api_keys JSONB DEFAULT '{}';
-                    END IF;
-                END $$;
-            """)
+        # Conversations table (no user_id - local single-user)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS conversations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT DEFAULT 'New Conversation',
+                system_prompt TEXT DEFAULT '',
+                documents TEXT DEFAULT '[]',
+                provider_settings TEXT DEFAULT '{}',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
 
-            # Conversations table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS conversations (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                    title VARCHAR(255) DEFAULT 'New Conversation',
-                    system_prompt TEXT DEFAULT '',
-                    documents JSONB DEFAULT '[]',
-                    provider_settings JSONB DEFAULT '{}',
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
+        # Messages table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                model TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
 
-            # Add missing columns to conversations table if they don't exist
-            cur.execute("""
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='conversations' AND column_name='documents') THEN
-                        ALTER TABLE conversations ADD COLUMN documents JSONB DEFAULT '[]';
-                    END IF;
-                END $$;
-            """)
+        # Enable foreign keys
+        cur.execute("PRAGMA foreign_keys = ON")
 
-            # Messages table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS messages (
-                    id SERIAL PRIMARY KEY,
-                    conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
-                    role VARCHAR(20) NOT NULL,
-                    content TEXT NOT NULL,
-                    model VARCHAR(100),
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-
-            conn.commit()
-            print("Database tables initialized")
+        conn.commit()
+        print(f"Database initialized at {DB_PATH}")
