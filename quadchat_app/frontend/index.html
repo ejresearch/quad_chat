@@ -309,18 +309,22 @@
         }
 
         .sidebar-footer {
-            padding: 1rem;
+            padding: 0.75rem;
             border-top: none;
             background: #171717;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: center;
+            gap: 0.4rem;
         }
 
         .settings-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            max-width: 36px;
+            aspect-ratio: 1;
+            border-radius: 8px;
             background: #2f2f2f;
             border: none;
             color: #b4b4b4;
@@ -329,11 +333,13 @@
             align-items: center;
             justify-content: center;
             transition: all 0.15s;
+            flex-shrink: 0;
+            flex-grow: 0;
         }
 
         .settings-btn svg {
-            width: 28px;
-            height: 28px;
+            width: 18px;
+            height: 18px;
         }
 
         .settings-btn:hover {
@@ -341,8 +347,13 @@
             color: #fff;
         }
 
+        .settings-btn.active {
+            background: #4f4f4f;
+            color: #fff;
+        }
+
         .settings-btn.help-btn {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 600;
         }
 
@@ -418,6 +429,8 @@
             overflow: hidden;
             position: relative;
             background: #212121;
+            display: flex;
+            flex-direction: column;
         }
 
         .empty-state-main {
@@ -456,15 +469,14 @@
             width: 100%;
         }
 
-        /* Grid View - 4 vertical columns */
+        /* Grid View - 4 vertical columns with resizable dividers */
         .grid-view {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: 1fr;
-            gap: 1px;
+            flex-direction: row;
             padding: 0;
-            background: #3f3f3f;
-            height: 100%;
+            background: #2a2a2a;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
         }
 
         .grid-view .chat-panel {
@@ -474,6 +486,74 @@
             overflow: hidden;
             border-radius: 0;
             box-shadow: none;
+            flex: 1 1 25%;
+            min-width: 150px;
+        }
+
+        /* Resizable dividers */
+        .grid-divider {
+            width: 6px;
+            background: #2a2a2a;
+            cursor: col-resize;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+
+        .grid-divider:hover,
+        .grid-divider.dragging {
+            background: #4f4f4f;
+        }
+
+        .grid-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 30px;
+            background: #555;
+            border-radius: 1px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .grid-divider:hover::after,
+        .grid-divider.dragging::after {
+            opacity: 1;
+        }
+
+        /* Sync scroll toggle */
+        .sync-scroll-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background: transparent;
+            border: 1px solid #3f3f3f;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-left: auto;
+        }
+
+        .sync-scroll-toggle:hover {
+            background: #2f2f2f;
+            color: var(--text-primary);
+        }
+
+        .sync-scroll-toggle.active {
+            background: #3f3f3f;
+            color: var(--text-primary);
+            border-color: #5f5f5f;
+        }
+
+        .sync-scroll-toggle svg {
+            width: 14px;
+            height: 14px;
         }
 
         .grid-view .panel-header {
@@ -508,9 +588,13 @@
             display: none;
         }
 
+        .grid-view.has-expanded .grid-divider {
+            display: none;
+        }
+
         .grid-view.has-expanded .chat-panel.expanded {
             display: flex;
-            grid-column: 1 / -1;
+            flex: 1;
         }
 
         .grid-view .chat-messages {
@@ -1530,6 +1614,22 @@
                     </svg>
                 </button>
                 <button class="settings-btn help-btn" onclick="showOnboarding()" title="Setup Guide">?</button>
+                <button id="sync-scroll-btn" class="settings-btn" onclick="toggleSyncScroll()" title="Sync Scroll">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 1l4 4-4 4"/>
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                        <path d="M7 23l-4-4 4-4"/>
+                        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                    </svg>
+                </button>
+                <button class="settings-btn" onclick="resetPanelSizes()" title="Reset Panel Sizes">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                </button>
             </div>
         </aside>
 
@@ -1601,6 +1701,7 @@
                         </div>
                         <div class="chat-messages" id="messages-1"></div>
                     </div>
+                    <div class="grid-divider" data-left="1" data-right="2"></div>
                     <div class="chat-panel" id="panel-2">
                         <div class="panel-header">
                             <div class="panel-header-left">
@@ -1633,6 +1734,7 @@
                         </div>
                         <div class="chat-messages" id="messages-2"></div>
                     </div>
+                    <div class="grid-divider" data-left="2" data-right="3"></div>
                     <div class="chat-panel" id="panel-3">
                         <div class="panel-header">
                             <div class="panel-header-left">
@@ -1664,6 +1766,7 @@
                         </div>
                         <div class="chat-messages" id="messages-3"></div>
                     </div>
+                    <div class="grid-divider" data-left="3" data-right="4"></div>
                     <div class="chat-panel" id="panel-4">
                         <div class="panel-header">
                             <div class="panel-header-left">
@@ -1921,16 +2024,29 @@
                     <p class="onboarding-subtitle">Active providers appear in the response grid.</p>
                 </div>
 
-                <!-- Step 5: Desktop App -->
+                <!-- Step 5: Grid View Tools -->
                 <div class="onboarding-step" data-step="5">
+                    <h2>Grid View Tools</h2>
+                    <p>Control how panels display in the response grid.</p>
+                    <div class="onboarding-feature">
+                        <strong>Sync Scroll:</strong> Scroll all panels together
+                    </div>
+                    <div class="onboarding-feature">
+                        <strong>Reset Sizes:</strong> Return panels to equal widths
+                    </div>
+                    <p class="onboarding-subtitle">Drag dividers between panels to resize.</p>
+                </div>
+
+                <!-- Step 6: Desktop App -->
+                <div class="onboarding-step" data-step="6">
                     <h2>Install Desktop App</h2>
                     <p>Launch QuadChat from your Desktop.</p>
                     <button class="onboarding-install-btn" onclick="installDesktopApp()">Install to Desktop</button>
                     <p class="onboarding-subtitle">Optional - you can always use the browser.</p>
                 </div>
 
-                <!-- Step 6: Done -->
-                <div class="onboarding-step" data-step="6">
+                <!-- Step 7: Done -->
+                <div class="onboarding-step" data-step="7">
                     <h2>You're Ready!</h2>
                     <p>Start chatting and compare how different models respond.</p>
                     <p class="onboarding-subtitle">Reopen this guide anytime with the <strong>?</strong> button.</p>
@@ -1951,6 +2067,7 @@
                     <span class="onboarding-dot" data-step="4"></span>
                     <span class="onboarding-dot" data-step="5"></span>
                     <span class="onboarding-dot" data-step="6"></span>
+                    <span class="onboarding-dot" data-step="7"></span>
                 </div>
 
                 <button class="onboarding-arrow onboarding-next" onclick="nextOnboardingStep()">
@@ -1964,6 +2081,6 @@
         </div>
     </div>
 
-    <script src="js/quadchat.js?v=13"></script>
+    <script src="js/quadchat.js?v=14"></script>
 </body>
 </html>

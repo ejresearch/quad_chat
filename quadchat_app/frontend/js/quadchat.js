@@ -27,6 +27,17 @@ let providerModels = {
     '4': 'grok-4-0709'
 };
 
+// Panel resizing state
+let panelSizes = [25, 25, 25, 25]; // Percentages for each panel
+let isDragging = false;
+let activeDivider = null;
+let startX = 0;
+let startSizes = [];
+
+// Sync scroll state
+let syncScrollEnabled = false;
+let isScrolling = false;
+
 // Logo carousel rotation
 let logoCarouselIndex = 0;
 function startLogoCarousel() {
@@ -410,7 +421,7 @@ function renderMessages() {
 
     if (currentTab === 'all') {
         document.getElementById('single-view').style.display = 'none';
-        document.getElementById('grid-view').style.display = 'grid';
+        document.getElementById('grid-view').style.display = 'flex';
 
         ['1', '2', '3', '4'].forEach(num => {
             document.getElementById(`messages-${num}`).innerHTML = '';
@@ -1169,9 +1180,177 @@ async function installDesktopApp() {
     }
 }
 
+// ============================================
+// Panel Resizing
+// ============================================
+
+function initPanelResizing() {
+    const dividers = document.querySelectorAll('.grid-divider');
+
+    dividers.forEach(divider => {
+        divider.addEventListener('mousedown', startDragging);
+    });
+
+    document.addEventListener('mousemove', handleDragging);
+    document.addEventListener('mouseup', stopDragging);
+
+    // Load saved sizes from localStorage
+    const savedSizes = localStorage.getItem('quadchat_panel_sizes');
+    if (savedSizes) {
+        panelSizes = JSON.parse(savedSizes);
+        applyPanelSizes();
+    }
+}
+
+function startDragging(e) {
+    isDragging = true;
+    activeDivider = e.target;
+    activeDivider.classList.add('dragging');
+    startX = e.clientX;
+    startSizes = [...panelSizes];
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+}
+
+function handleDragging(e) {
+    if (!isDragging || !activeDivider) return;
+
+    const gridView = document.getElementById('grid-view');
+    const gridWidth = gridView.offsetWidth;
+    const deltaX = e.clientX - startX;
+    const deltaPercent = (deltaX / gridWidth) * 100;
+
+    const leftIndex = parseInt(activeDivider.dataset.left) - 1;
+    const rightIndex = parseInt(activeDivider.dataset.right) - 1;
+
+    // Calculate new sizes
+    let newLeftSize = startSizes[leftIndex] + deltaPercent;
+    let newRightSize = startSizes[rightIndex] - deltaPercent;
+
+    // Enforce minimum size (10%)
+    const minSize = 10;
+    if (newLeftSize < minSize) {
+        newRightSize -= (minSize - newLeftSize);
+        newLeftSize = minSize;
+    }
+    if (newRightSize < minSize) {
+        newLeftSize -= (minSize - newRightSize);
+        newRightSize = minSize;
+    }
+
+    panelSizes[leftIndex] = newLeftSize;
+    panelSizes[rightIndex] = newRightSize;
+
+    applyPanelSizes();
+}
+
+function stopDragging() {
+    if (isDragging) {
+        isDragging = false;
+        if (activeDivider) {
+            activeDivider.classList.remove('dragging');
+        }
+        activeDivider = null;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+
+        // Save sizes to localStorage
+        localStorage.setItem('quadchat_panel_sizes', JSON.stringify(panelSizes));
+    }
+}
+
+function applyPanelSizes() {
+    for (let i = 1; i <= 4; i++) {
+        const panel = document.getElementById(`panel-${i}`);
+        if (panel) {
+            panel.style.flex = `0 0 ${panelSizes[i-1]}%`;
+        }
+    }
+}
+
+function resetPanelSizes() {
+    panelSizes = [25, 25, 25, 25];
+    applyPanelSizes();
+    localStorage.removeItem('quadchat_panel_sizes');
+}
+
+// ============================================
+// Sync Scroll
+// ============================================
+
+function initSyncScroll() {
+    const messageContainers = [
+        document.getElementById('messages-1'),
+        document.getElementById('messages-2'),
+        document.getElementById('messages-3'),
+        document.getElementById('messages-4')
+    ];
+
+    messageContainers.forEach((container, index) => {
+        if (container) {
+            container.addEventListener('scroll', (e) => handleSyncScroll(e, index));
+        }
+    });
+
+    // Load sync scroll preference
+    syncScrollEnabled = localStorage.getItem('quadchat_sync_scroll') === 'true';
+    updateSyncScrollButton();
+}
+
+function handleSyncScroll(e, sourceIndex) {
+    if (!syncScrollEnabled || isScrolling) return;
+
+    isScrolling = true;
+    const source = e.target;
+    const scrollPercent = source.scrollTop / (source.scrollHeight - source.clientHeight);
+
+    const containers = [
+        document.getElementById('messages-1'),
+        document.getElementById('messages-2'),
+        document.getElementById('messages-3'),
+        document.getElementById('messages-4')
+    ];
+
+    containers.forEach((container, index) => {
+        if (container && index !== sourceIndex) {
+            const targetScrollTop = scrollPercent * (container.scrollHeight - container.clientHeight);
+            container.scrollTop = targetScrollTop;
+        }
+    });
+
+    // Reset flag after a short delay
+    setTimeout(() => { isScrolling = false; }, 50);
+}
+
+function toggleSyncScroll() {
+    syncScrollEnabled = !syncScrollEnabled;
+    localStorage.setItem('quadchat_sync_scroll', syncScrollEnabled);
+    updateSyncScrollButton();
+}
+
+function updateSyncScrollButton() {
+    const btn = document.getElementById('sync-scroll-btn');
+    if (btn) {
+        if (syncScrollEnabled) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    }
+}
+
+// ============================================
+// Initialize panel features on load
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    initPanelResizing();
+    initSyncScroll();
+});
+
 // Onboarding Wizard
 let currentOnboardingStep = 1;
-const totalOnboardingSteps = 6;
+const totalOnboardingSteps = 7;
 
 function showOnboarding() {
     currentOnboardingStep = 1;
