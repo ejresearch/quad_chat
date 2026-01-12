@@ -241,8 +241,8 @@ class AIProviderManager:
         "openai-gpt4-turbo": {"class": OpenAIProvider, "model": "gpt-4-turbo", "name": "OpenAI GPT-4 Turbo", "key_name": "openai"},
         "openai-o3": {"class": OpenAIProvider, "model": "o3", "name": "OpenAI o3", "key_name": "openai"},
         "openai-o4-mini": {"class": OpenAIProvider, "model": "o4-mini", "name": "OpenAI o4-mini", "key_name": "openai"},
-        # Generic openai provider - defaults to stable gpt-4o
-        "openai": {"class": OpenAIProvider, "model": "gpt-4o", "name": "OpenAI", "key_name": "openai"},
+        # Generic openai provider - defaults to GPT-5.2
+        "openai": {"class": OpenAIProvider, "model": "gpt-5.2", "name": "OpenAI", "key_name": "openai"},
 
         # Anthropic Claude - Latest Models (Dec 2025)
         # Opus 4.5 is the latest and most capable

@@ -10,7 +10,7 @@ let referenceDocuments = [];
 
 // Provider configuration
 const PROVIDER_INFO = {
-    '1': { id: 'openai', name: 'ChatGPT', defaultModel: 'gpt-4o' },
+    '1': { id: 'openai', name: 'ChatGPT', defaultModel: 'gpt-5.2' },
     '2': { id: 'claude', name: 'Claude', defaultModel: 'claude-sonnet-4-5-20250929' },
     '3': { id: 'gemini', name: 'Gemini', defaultModel: 'gemini-3-pro-preview' },
     '4': { id: 'grok', name: 'Grok', defaultModel: 'grok-4-0709' }
@@ -21,7 +21,7 @@ let enabledProviders = new Set(['1', '2', '3', '4']);
 
 // Selected models per provider
 let providerModels = {
-    '1': 'gpt-4o',
+    '1': 'gpt-5.2',
     '2': 'claude-sonnet-4-5-20250929',
     '3': 'gemini-3-pro-preview',
     '4': 'grok-4-0709'
@@ -31,7 +31,7 @@ let providerModels = {
 function resetProvidersToDefault() {
     enabledProviders = new Set(['1', '2', '3', '4']);
     providerModels = {
-        '1': 'gpt-4o',
+        '1': 'gpt-5.2',
         '2': 'claude-sonnet-4-5-20250929',
         '3': 'gemini-3-pro-preview',
         '4': 'grok-4-0709'
@@ -43,7 +43,7 @@ function resetProvidersToDefault() {
 function loadProviderSettings(settings) {
     enabledProviders = new Set(['1', '2', '3', '4']);
     providerModels = {
-        '1': 'gpt-4o',
+        '1': 'gpt-5.2',
         '2': 'claude-sonnet-4-5-20250929',
         '3': 'gemini-3-pro-preview',
         '4': 'grok-4-0709'
