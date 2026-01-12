@@ -12,7 +12,7 @@ let referenceDocuments = [];
 const PROVIDER_INFO = {
     '1': { id: 'openai', name: 'ChatGPT', defaultModel: 'gpt-4o' },
     '2': { id: 'claude', name: 'Claude', defaultModel: 'claude-sonnet-4-5-20250929' },
-    '3': { id: 'gemini', name: 'Gemini', defaultModel: 'gemini-2.0-flash' },
+    '3': { id: 'gemini', name: 'Gemini', defaultModel: 'gemini-3-pro-preview' },
     '4': { id: 'grok', name: 'Grok', defaultModel: 'grok-3' }
 };
 
@@ -23,7 +23,7 @@ let enabledProviders = new Set(['1', '2', '3', '4']);
 let providerModels = {
     '1': 'gpt-4o',
     '2': 'claude-sonnet-4-5-20250929',
-    '3': 'gemini-2.0-flash',
+    '3': 'gemini-3-pro-preview',
     '4': 'grok-3'
 };
 
@@ -33,7 +33,7 @@ function resetProvidersToDefault() {
     providerModels = {
         '1': 'gpt-4o',
         '2': 'claude-sonnet-4-5-20250929',
-        '3': 'gemini-2.0-flash',
+        '3': 'gemini-3-pro-preview',
         '4': 'grok-3'
     };
     initProviderUI();
@@ -45,7 +45,7 @@ function loadProviderSettings(settings) {
     providerModels = {
         '1': 'gpt-4o',
         '2': 'claude-sonnet-4-5-20250929',
-        '3': 'gemini-2.0-flash',
+        '3': 'gemini-3-pro-preview',
         '4': 'grok-3'
     };
 

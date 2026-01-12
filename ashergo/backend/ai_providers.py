@@ -261,8 +261,8 @@ class AIProviderManager:
         "gemini-2.5-pro": {"class": GeminiProvider, "model": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "key_name": "google"},
         "gemini-2.5-flash": {"class": GeminiProvider, "model": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "key_name": "google"},
         "gemini-2.0-flash": {"class": GeminiProvider, "model": "gemini-2.0-flash", "name": "Gemini 2.0 Flash", "key_name": "google"},
-        # Generic gemini provider - defaults to stable 2.0 flash
-        "gemini": {"class": GeminiProvider, "model": "gemini-2.0-flash", "name": "Gemini", "key_name": "google"},
+        # Generic gemini provider - defaults to 3 Pro
+        "gemini": {"class": GeminiProvider, "model": "gemini-3-pro-preview", "name": "Gemini", "key_name": "google"},
 
         # xAI Grok - Latest Models (Dec 2025)
         # Based on API query - actual available models
