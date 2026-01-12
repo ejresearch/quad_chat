@@ -1,5 +1,5 @@
-# ASHER Project Requirements
-# Main dependencies are in ashergo/backend/requirements.txt
+# QuadChat v2.0.0
+# Main dependencies are in quadchat_app/backend/requirements.txt
 # This file is for convenience when running from root
 
--r ashergo/backend/requirements.txt
+-r quadchat_app/backend/requirements.txt
