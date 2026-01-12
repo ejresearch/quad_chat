@@ -27,7 +27,7 @@ The goal is not abstraction, but clarity—making it easy to see how different m
 | Data Storage | SQLite (Robust) | Browser Storage (Fragile) | MongoDB (Complex) | Cloud (Not yours) |
 | Multi-Model View | Native 4-Pane Grid | 2-4 Pane Grid | 1-2 Panes (mostly) | Multi-row list |
 | Setup Difficulty | Low (Script) | Very Low (Install) | High (Docker/Env) | None (Login) |
-| Ideal User | Devs / Power Users | Casual Users | Enterprise / Teams | Benchmarkers |
+| Ideal User | Technical Creatives | Casual Users | Enterprise / Teams | Benchmarkers |
 
 ---
 
