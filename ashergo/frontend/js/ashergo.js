@@ -13,7 +13,7 @@ const PROVIDER_INFO = {
     '1': { id: 'openai', name: 'ChatGPT', defaultModel: 'gpt-4o' },
     '2': { id: 'claude', name: 'Claude', defaultModel: 'claude-sonnet-4-5-20250929' },
     '3': { id: 'gemini', name: 'Gemini', defaultModel: 'gemini-3-pro-preview' },
-    '4': { id: 'grok', name: 'Grok', defaultModel: 'grok-3' }
+    '4': { id: 'grok', name: 'Grok', defaultModel: 'grok-4-0709' }
 };
 
 // Enabled providers
@@ -24,7 +24,7 @@ let providerModels = {
     '1': 'gpt-4o',
     '2': 'claude-sonnet-4-5-20250929',
     '3': 'gemini-3-pro-preview',
-    '4': 'grok-3'
+    '4': 'grok-4-0709'
 };
 
 // Reset providers to defaults
@@ -34,7 +34,7 @@ function resetProvidersToDefault() {
         '1': 'gpt-4o',
         '2': 'claude-sonnet-4-5-20250929',
         '3': 'gemini-3-pro-preview',
-        '4': 'grok-3'
+        '4': 'grok-4-0709'
     };
     initProviderUI();
 }
@@ -46,7 +46,7 @@ function loadProviderSettings(settings) {
         '1': 'gpt-4o',
         '2': 'claude-sonnet-4-5-20250929',
         '3': 'gemini-3-pro-preview',
-        '4': 'grok-3'
+        '4': 'grok-4-0709'
     };
 
     if (settings && Object.keys(settings).length > 0) {

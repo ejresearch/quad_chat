@@ -271,8 +271,8 @@ class AIProviderManager:
         "grok-4.1-fast": {"class": GrokProvider, "model": "grok-4-1-fast-non-reasoning", "name": "xAI Grok 4.1 Fast", "key_name": "xai"},
         "grok-4": {"class": GrokProvider, "model": "grok-4-0709", "name": "xAI Grok 4", "key_name": "xai"},
         "grok-3": {"class": GrokProvider, "model": "grok-3", "name": "xAI Grok 3", "key_name": "xai"},
-        # Generic grok provider - defaults to stable grok-3
-        "grok": {"class": GrokProvider, "model": "grok-3", "name": "xAI Grok", "key_name": "xai"},
+        # Generic grok provider - defaults to Grok 4
+        "grok": {"class": GrokProvider, "model": "grok-4-0709", "name": "xAI Grok", "key_name": "xai"},
     }
 
     @classmethod
