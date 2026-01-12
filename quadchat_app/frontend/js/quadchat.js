@@ -462,9 +462,7 @@ function renderMessages() {
 
         messages.forEach(msg => {
             if (msg.role === 'user' || matchesProvider(msg.model, currentTab)) {
-                const div = document.createElement('div');
-                div.className = `message-bubble ${msg.role}`;
-                div.textContent = msg.content;
+                const div = createMessageElement(msg.role, msg.content);
                 container.appendChild(div);
             }
         });
@@ -488,9 +486,7 @@ function matchesProvider(model, tab) {
 
 function addMessageToPanel(panelNum, role, content) {
     const container = document.getElementById(`messages-${panelNum}`);
-    const div = document.createElement('div');
-    div.className = `message-bubble ${role}`;
-    div.textContent = content;
+    const div = createMessageElement(role, content);
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 }
@@ -559,9 +555,7 @@ async function sendMessage() {
 
     if (currentTab !== 'all') {
         const container = document.getElementById('single-messages');
-        const userDiv = document.createElement('div');
-        userDiv.className = 'message-bubble user';
-        userDiv.textContent = message;
+        const userDiv = createMessageElement('user', message);
         container.appendChild(userDiv);
 
         const loadingDiv = document.createElement('div');
@@ -621,9 +615,7 @@ async function sendToProvider(providerId, message, systemPrompt, panelNum, skipU
             addMessageToPanel(panelNum, 'assistant', data.assistant_message.content);
         } else {
             const container = document.getElementById('single-messages');
-            const div = document.createElement('div');
-            div.className = 'message-bubble assistant';
-            div.textContent = data.assistant_message.content;
+            const div = createMessageElement('assistant', data.assistant_message.content);
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
@@ -640,6 +632,7 @@ async function sendToProvider(providerId, message, systemPrompt, panelNum, skipU
             div.className = 'message-bubble error';
             div.textContent = `Error: ${error.message}`;
             container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
         }
     }
 }
@@ -1014,6 +1007,55 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Markdown rendering with syntax highlighting
+function renderMarkdown(text) {
+    if (!text) return '';
+
+    // Configure marked with highlight.js
+    if (typeof marked !== 'undefined') {
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (e) {}
+                }
+                // Auto-detect language
+                if (typeof hljs !== 'undefined') {
+                    try {
+                        return hljs.highlightAuto(code).value;
+                    } catch (e) {}
+                }
+                return code;
+            },
+            breaks: true,
+            gfm: true
+        });
+
+        return marked.parse(text);
+    }
+
+    // Fallback: basic formatting if marked isn't loaded
+    return escapeHtml(text).replace(/\n/g, '<br>');
+}
+
+// Create message element with markdown support
+function createMessageElement(role, content) {
+    const div = document.createElement('div');
+    div.className = `message-bubble ${role}`;
+
+    if (role === 'user') {
+        div.textContent = content;
+    } else {
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'markdown-content';
+        contentDiv.innerHTML = renderMarkdown(content);
+        div.appendChild(contentDiv);
+    }
+
+    return div;
 }
 
 // PWA Install functionality
