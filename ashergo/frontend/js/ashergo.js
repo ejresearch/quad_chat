@@ -11,7 +11,7 @@ let referenceDocuments = [];
 // Provider configuration
 const PROVIDER_INFO = {
     '1': { id: 'openai', name: 'ChatGPT', defaultModel: 'gpt-4o' },
-    '2': { id: 'claude', name: 'Claude', defaultModel: 'claude-3-haiku-20240307' },
+    '2': { id: 'claude', name: 'Claude', defaultModel: 'claude-sonnet-4-5-20250929' },
     '3': { id: 'gemini', name: 'Gemini', defaultModel: 'gemini-2.0-flash' },
     '4': { id: 'grok', name: 'Grok', defaultModel: 'grok-3' }
 };
@@ -22,7 +22,7 @@ let enabledProviders = new Set(['1', '2', '3', '4']);
 // Selected models per provider
 let providerModels = {
     '1': 'gpt-4o',
-    '2': 'claude-3-haiku-20240307',
+    '2': 'claude-sonnet-4-5-20250929',
     '3': 'gemini-2.0-flash',
     '4': 'grok-3'
 };
@@ -32,7 +32,7 @@ function resetProvidersToDefault() {
     enabledProviders = new Set(['1', '2', '3', '4']);
     providerModels = {
         '1': 'gpt-4o',
-        '2': 'claude-3-haiku-20240307',
+        '2': 'claude-sonnet-4-5-20250929',
         '3': 'gemini-2.0-flash',
         '4': 'grok-3'
     };
@@ -44,7 +44,7 @@ function loadProviderSettings(settings) {
     enabledProviders = new Set(['1', '2', '3', '4']);
     providerModels = {
         '1': 'gpt-4o',
-        '2': 'claude-3-haiku-20240307',
+        '2': 'claude-sonnet-4-5-20250929',
         '3': 'gemini-2.0-flash',
         '4': 'grok-3'
     };
